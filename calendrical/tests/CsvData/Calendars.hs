@@ -600,15 +600,9 @@ isoDecoder = roundTrip parseI fromFixed fixedFrom
       [yc, wc, dc] -> do
         y <- parseInteger yc
         w <- parseFinOneBased wc
-        dow <- parseIsoDay dc
-        Right (Iso.Date (fromInteger y) w dow)
+        d <- parseFin dc
+        Right (Iso.Date (fromInteger y) w d)
       _ -> Left ("Iso: expected 3 cells, got " <> show cs)
-    parseIsoDay :: ByteString -> Either String DayOfWeek
-    parseIsoDay bs = do
-      n <- parseInteger bs
-      if 1 <= n && n <= 7
-        then Right (toEnum (fromIntegral n :: Int))
-        else Left ("ISO day must be 1..7, got " <> show n)
 
 icelandicDecoder :: Decoder
 icelandicDecoder = roundTrip parseI fromFixed fixedFrom
