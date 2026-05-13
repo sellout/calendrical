@@ -171,13 +171,13 @@ type Real = Rational -- Double
 type ModularEnum :: Type -> Constraint
 class (Enum a, Bounded a) => ModularEnum a
 
-modularToEnum :: forall a. (ModularEnum a) => Base.Int -> a
-modularToEnum i =
+-- | This should always return an integer in the range of the `ModularEnum`’s
+--   bounds.
+modularToEnum ::
+  forall a proxy. (ModularEnum a) => proxy a -> Base.Int -> Base.Int
+modularToEnum _ i =
   let minb = fromEnum @a minBound
-   in foldr
-        (const succ)
-        minBound
-        [1 .. (i - minb) `mod` (fromEnum @a maxBound - minb)]
+   in (i - minb) `mod` (fromEnum @a maxBound - minb + 1) + minb
 
 -- | Generalizes `Prelude.mod` to handle non-`Integral` types.
 --

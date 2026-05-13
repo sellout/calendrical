@@ -369,14 +369,28 @@ data DayOfWeek
 
 instance Enum DayOfWeek where
   fromEnum = \case
+    -- (1.53)
     Sunday -> 0
+    -- (1.54)
     Monday -> 1
+    -- (1.55)
     Tuesday -> 2
+    -- (1.56)
     Wednesday -> 3
+    -- (1.57)
     Thursday -> 4
+    -- (1.58)
     Friday -> 5
+    -- (1.59)
     Saturday -> 6
-  toEnum = modularToEnum
+  toEnum i = case modularToEnum (Proxy :: Proxy DayOfWeek) i of
+    0 -> Sunday
+    1 -> Monday
+    2 -> Tuesday
+    3 -> Wednesday
+    4 -> Thursday
+    5 -> Friday
+    _ -> Saturday
 
 instance ModularEnum DayOfWeek
 
