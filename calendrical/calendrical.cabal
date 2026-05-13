@@ -23,6 +23,8 @@ extra-doc-files:
   CHANGELOG.md
   README.md
   docs/*.md
+data-files:
+  tests/data/*.csv
 tested-with:
   GHC == {
     9.6.1, 9.6.3,
@@ -192,3 +194,32 @@ test-suite doctests
     -- “Build_doctests.hs”, we set it here, and that means it has to match
     -- doctests.hs, which is `Unsafe`.
     Unsafe
+
+test-suite csv-data
+  import: defaults
+  type: exitcode-stdio-1.0
+  hs-source-dirs:
+    tests
+  main-is: csv-data.hs
+  default-extensions:
+    OverloadedStrings
+  build-depends:
+    bytestring,
+    calendrical,
+    cassava,
+    containers,
+    fin ^>= {0.3},
+    tasty,
+    tasty-expected-failure,
+    tasty-hunit,
+    text,
+    vector,
+  other-modules:
+    CsvData.Calendars
+    CsvData.Common
+    CsvData.Files.Dates
+    CsvData.Files.Holiday
+    CsvData.Holidays
+    Paths_calendrical
+  autogen-modules:
+    Paths_calendrical

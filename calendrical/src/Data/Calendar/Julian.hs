@@ -5,15 +5,24 @@
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 module Data.Calendar.Julian
   ( Date (Date),
+    Event (Ides, Kalends, Nones),
     Month (..),
-    RomanDate,
+    RomanDate (RomanDate),
     RomanYear (AUC),
     Year (BCE, CE),
     aucYearFromJulian,
+    count,
+    day,
     easternOrthodoxChristmas,
+    event,
     inGregorian,
+    leap,
+    month,
+    monthR,
+    year,
     yearFromAUC,
     yearFromInteger,
+    yearR,
     yearToInteger,
     yearRomeFounded,
   )
@@ -30,6 +39,7 @@ import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -74,7 +84,7 @@ type Year :: Type
 data Year
   = BCE PositiveInteger
   | CE PositiveInteger
-  deriving stock (Eq)
+  deriving stock (Eq, Show)
 
 instance Ord Year where
   compare a b = compare (yearToInteger a) $ yearToInteger b
@@ -106,7 +116,7 @@ type Day = Fin (Nat.FromGHC 32)
 
 type Date :: Type
 data Date = Date {year :: Year, month :: Month, day :: Day}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = RD (-1)
@@ -146,7 +156,7 @@ data Event
   = Kalends
   | Nones
   | Ides
-  deriving stock (Bounded, Eq, Ord)
+  deriving stock (Bounded, Eq, Ord, Show)
 
 idesOfMonth :: Month -> Day
 idesOfMonth month = if month `elem` [March, May, July, October] then 15 else 13
@@ -162,7 +172,7 @@ data RomanDate = RomanDate
     count :: Fin (Nat.FromGHC 20),
     leap :: Bool
   }
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar RomanDate where
   epoch _ = epoch (Proxy :: Proxy Date)

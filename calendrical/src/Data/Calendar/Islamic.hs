@@ -26,6 +26,7 @@ import "base" Data.Functor (fmap)
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, (<))
 import "base" Data.Proxy (Proxy (Proxy))
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -79,14 +80,14 @@ data Month
   | Shawwal
   | DhuAlQa'da
   | DhuAlHijja
-  deriving stock (Bounded, Enum, Eq, Ord)
+  deriving stock (Bounded, Enum, Eq, Ord, Show)
 
 type Day :: Type
 type Day = Fin (Nat.FromGHC 31)
 
 type Date :: Type
 data Date = Date {year :: Year, month :: Month, day :: Day}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = fixedFrom $ Julian.Date (Julian.CE 622) Julian.July 16

@@ -8,6 +8,7 @@
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 module Data.Calendar.Icelandic
   ( Date (Date),
+    Season (Summer, Winter),
     Week,
     Year,
     isLeapYear,
@@ -33,7 +34,7 @@ import "base" Data.Maybe (Maybe (Nothing))
 import "base" Data.Ord (Ord, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Tuple (uncurry)
-import "base" Text.Show (show)
+import "base" Text.Show (Show, show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "mixed-radix" Numeric.MixedRadix (MixedIntegral)
@@ -76,7 +77,7 @@ type Season :: Type
 data Season
   = Summer
   | Winter
-  deriving stock (Bounded, Enum, Eq, Ord)
+  deriving stock (Bounded, Enum, Eq, Ord, Show)
 
 type Week :: Type
 type Week = Fin (Nat.FromGHC 28)
@@ -88,7 +89,7 @@ data Date = Date
     week :: Week,
     weekday :: DayOfWeek
   }
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 summer :: Year -> FixedDate
 summer iYear = kdayOnOrAfter Thursday apr19

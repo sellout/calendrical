@@ -54,6 +54,7 @@ import "base" Data.Ord (Ord, Ordering (EQ, GT, LT), compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
 import "base" Data.Tuple (fst, snd, uncurry)
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -115,7 +116,7 @@ data Month
   | October
   | November
   | December
-  deriving stock (Bounded, Eq, Ord)
+  deriving stock (Bounded, Eq, Ord, Show)
 
 instance Enum Month where
   fromEnum = \case
@@ -141,7 +142,7 @@ type Day = Fin (Nat.FromGHC 32)
 type Date :: Type
 data Date = Date
   {year :: Year, month :: Month, day :: Day}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = RD 1
@@ -178,6 +179,7 @@ instance Calendar Date where
 type Year :: Type
 newtype Year = Year {yearToInteger :: Integer}
   deriving newtype (Eq, Ord, Num)
+  deriving stock (Show)
 
 isLeapYear :: Year -> Bool
 isLeapYear (Year gYear) =

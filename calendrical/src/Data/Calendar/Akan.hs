@@ -5,7 +5,9 @@
 -- Copyright: 2024 Greg Pfeil
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 module Data.Calendar.Akan
-  ( Name,
+  ( Name (Name),
+    Prefix (Fo, Kuru, Kwa, Mono, Nkyi, Nwona),
+    Stem (Bene, Dwo, Fie, Kwasi, Memene, Wukuo, Yaw),
     dayNameOnOrBefore,
     nameDifference,
     prefix,
@@ -15,13 +17,15 @@ where
 
 import "base" Control.Category ((.))
 import "base" Control.Monad ((=<<))
+import "base" Data.Eq (Eq)
 import "base" Data.Function (($))
 import "base" Data.Functor.Identity (Identity (Identity))
 import "base" Data.Kind (Type)
 import "base" Data.List.NonEmpty (NonEmpty ((:|)))
+import "base" Data.Ord (Ord)
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Semigroup ((<>))
-import "base" Text.Show (show)
+import "base" Text.Show (Show, show)
 import "this" Data.Calendar
   ( CyclicCalendar,
     FixedDate (RD),
@@ -56,7 +60,7 @@ data Prefix
   | Kwa
   | Mono
   | Fo
-  deriving stock (Bounded)
+  deriving stock (Bounded, Eq, Ord, Show)
 
 instance Enum Prefix where
   fromEnum = \case
@@ -84,7 +88,7 @@ data Stem
   | Kwasi
   | Dwo
   | Bene
-  deriving stock (Bounded)
+  deriving stock (Bounded, Eq, Ord, Show)
 
 instance Enum Stem where
   fromEnum = \case
@@ -107,6 +111,7 @@ instance Enum Stem where
 
 type Name :: Type
 data Name = Name {prefix :: Prefix, stem :: Stem}
+  deriving stock (Eq, Ord, Show)
 
 dayName :: Integer -> Name
 dayName n =

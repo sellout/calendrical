@@ -21,6 +21,7 @@ import "base" Data.Function (($))
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, (<=))
 import "base" Data.Proxy (Proxy (Proxy))
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -46,7 +47,7 @@ type Week = Fin (Nat.FromGHC 54)
 
 type Date :: Type
 data Date = Date {year :: Year, week :: Week, day :: DayOfWeek}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = epoch (Proxy :: Proxy Gregorian.Date)

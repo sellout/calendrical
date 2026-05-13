@@ -34,6 +34,7 @@ import "base" Data.Functor (fmap)
 import "base" Data.Kind (Type)
 import "base" Data.Maybe (Maybe (Nothing))
 import "base" Data.Ord (Ord, (<))
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -63,7 +64,7 @@ type Day = Fin (Nat.FromGHC 32)
 -- | CALENDAR TYPE
 type Date :: Type -> Type
 data Date month = Date {year :: Year, month :: month, day :: Day}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 -- | This is a synonym for the data constructor. It’s necessary, because we
 --   can’t import the data constructor without the type constructor, but the

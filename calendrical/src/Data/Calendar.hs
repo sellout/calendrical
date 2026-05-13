@@ -16,12 +16,14 @@ module Data.Calendar
     Interval,
     JulianDayNumber (JD),
     FixedDate (RD),
+    ModifiedJulianDayNumber (MJD),
     Moment (Moment),
     Range,
     RationalMoment,
     StandardDay,
     StandardMonth,
     StandardYear,
+    Unix (SecondsSinceUnixEpoch),
     clockFromMoment,
     epoch,
     fixedFrom,
@@ -70,6 +72,7 @@ import "base" Data.Ord (Ord, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Tuple (fst, snd, uncurry)
 import "base" Numeric.Natural (Natural)
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "mixed-radix" Numeric.MixedRadix (MixedRadix)
@@ -110,6 +113,7 @@ import "base" Prelude
 type FixedDate :: Type
 newtype FixedDate = RD {offset :: Integer}
   deriving newtype (Enum, Eq, Num, Ord)
+  deriving stock (Show)
 
 fixedFromInteger :: Integer -> FixedDate -> FixedDate
 fixedFromInteger n epoch = RD n + epoch
@@ -214,7 +218,7 @@ instance Calendar FixedDate where
 
 type JulianDayNumber :: Type
 newtype JulianDayNumber = JD {dayNumber :: Real}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar JulianDayNumber where
   -- (1.3)
@@ -361,7 +365,7 @@ data DayOfWeek
   | Thursday
   | Friday
   | Saturday
-  deriving stock (Bounded, Eq, Ord)
+  deriving stock (Bounded, Eq, Ord, Show)
 
 instance Enum DayOfWeek where
   fromEnum = \case
@@ -433,7 +437,7 @@ kdayAfter k = kdayOnOrBefore k . (+ 7)
 
 type ModifiedJulianDayNumber :: Type
 newtype ModifiedJulianDayNumber = MJD Integer
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar ModifiedJulianDayNumber where
   epoch _ = RD 678576
@@ -447,7 +451,7 @@ instance Calendar ModifiedJulianDayNumber where
 
 type Unix :: Type
 newtype Unix = SecondsSinceUnixEpoch Second
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Unix where
   epoch _ = RD 719163
