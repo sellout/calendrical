@@ -9,11 +9,15 @@ module Numeric.Abs
   ( Abs,
     Unsigned,
     abs,
+    splitAbs,
   )
 where
 
+import "base" Control.Applicative (pure)
 import "base" Control.Category ((.))
 import "base" Data.Complex (Complex, magnitude)
+import "base" Data.Either (Either (Left))
+import "base" Data.Eq (Eq, (==))
 import "base" Data.Fixed (Fixed (MkFixed), HasResolution, resolution)
 import "base" Data.Function (($))
 import "base" Data.Functor (Functor, fmap)
@@ -28,7 +32,7 @@ import "base" Data.Word (Word, Word16, Word32, Word64, Word8)
 import "base" Foreign.C.Types (CChar, CDouble, CFloat, CSChar, CUChar)
 import "base" Numeric.Natural (Natural)
 import "this" Numeric.Orphans ()
-import "this" Numeric.Widen (widen)
+import "this" Numeric.Widen (Widen, widen)
 import "base" Prelude (Double, Float, Integer, Integral, Real, fromIntegral)
 import "base" Prelude qualified as Base (abs)
 
@@ -47,6 +51,14 @@ class (Real (Unsigned n)) => Abs n where
 
   -- | The absolute value of @n@.
   abs :: n -> Unsigned n
+
+-- | Returns  `Left` if we had to negate the value to get unsigned.
+splitAbs :: (Abs a, Eq a, Widen (Unsigned a) a) => a -> Either (Unsigned a) (Unsigned a)
+splitAbs x =
+  let a = abs x
+   in if widen a == x
+        then pure a
+        else Left a
 
 -- |
 --

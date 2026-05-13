@@ -27,7 +27,7 @@ import CsvData.Common
   )
 import "base" Control.Category ((.))
 import "base" Data.Bool (Bool, (&&))
-import "base" Data.Either (Either (Left, Right))
+import "base" Data.Either (Either (Left, Right), either)
 import "base" Data.Functor (fmap)
 import "base" Data.Int (Int)
 import "base" Data.Maybe (Maybe (Just, Nothing))
@@ -65,6 +65,7 @@ import "calendrical" Data.Calendar.Twelve30Plus5 qualified as T30P5
 import "fin" Data.Fin (Fin)
 import "fin" Data.Fin qualified as Fin
 import "fin" Data.Type.Nat qualified as Nat
+import "numeric-tangle" Numeric.Abs (splitAbs)
 import "base" Prelude
   ( Double,
     Enum,
@@ -481,16 +482,19 @@ gregorianDecoder = roundTrip parseG fromFixed fixedFrom
         Right (Gregorian.Date (fromInteger y) m d)
       _ -> Left ("Gregorian: expected 3 cells, got " <> show cs)
 
+parseJulianYear :: ByteString -> Either String Julian.Year
+parseJulianYear = fmap (either Julian.BCE Julian.CE . splitAbs) . parseInteger
+
 julianDecoder :: Decoder
 julianDecoder = roundTrip parseJ fromFixed fixedFrom
   where
     parseJ :: [ByteString] -> Either String Julian.Date
     parseJ cs = case cs of
       [yc, mc, dc] -> do
-        y <- parseInteger yc
+        y <- parseJulianYear yc
         m <- parseEnumFromOne @Gregorian.Month 12 mc
         d <- parseFin dc
-        Right (Julian.Date (Julian.yearFromInteger y) m d)
+        Right (Julian.Date y m d)
       _ -> Left ("Julian: expected 3 cells, got " <> show cs)
 
 romanDecoder :: Decoder
@@ -499,14 +503,14 @@ romanDecoder = roundTrip parseR fromFixed fixedFrom
     parseR :: [ByteString] -> Either String Julian.RomanDate
     parseR cs = case cs of
       [yc, mc, ec, cc, lc] -> do
-        y <- parseInteger yc
+        y <- parseJulianYear yc
         m <- parseEnumFromOne @Gregorian.Month 12 mc
         e <- parseEvent ec
         cnt <- parseFin cc
         l <- parseBoolean lc
         Right
           Julian.RomanDate
-            { Julian.yearR = Julian.yearFromInteger y,
+            { Julian.yearR = y,
               Julian.monthR = m,
               Julian.event = e,
               Julian.count = cnt,
