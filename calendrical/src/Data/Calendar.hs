@@ -437,9 +437,13 @@ kdayOnOrAfter k = kdayOnOrBefore k . (+ 6)
 kdayNearest :: DayOfWeek -> FixedDate -> FixedDate
 kdayNearest k = kdayOnOrBefore k . (+ 3)
 
+-- | Fixed date of the @k@-day before fixed @date@. @k@=0 means Sunday, @k@=1
+--   means Monday, and so on.
 kdayBefore :: DayOfWeek -> FixedDate -> FixedDate
-kdayBefore k = kdayOnOrBefore k . (\n -> n - 1)
+kdayBefore k date = kdayOnOrBefore k $ date - 1
 
+-- | Fixed date of the @k@-day after fixed @date@. @k@=0 means Sunday, @k@=1
+--   means Monday, and so on.
 kdayAfter :: DayOfWeek -> FixedDate -> FixedDate
 kdayAfter k = kdayOnOrBefore k . (+ 7)
 

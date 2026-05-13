@@ -241,6 +241,9 @@ lastDayOfMonth gYear gMonth =
 independenceDay :: Year -> FixedDate
 independenceDay gYear = fixedFrom $ Date gYear July 4
 
+-- | If @n@>0, return the @n@-th @k@-day on or after @gDate@. If @n@<0, return
+--   the @n@-th @k@-day on or before @gDate@. If @n@=0 return bogus. A @k@-day
+--   of 0 means Sunday, 1 means Monday, and so on.
 nthKday :: Integer -> DayOfWeek -> Date -> FixedDate
 nthKday n k gDate = RD $ case compare n 0 of
   GT -> 7 * n + offset (kdayBefore k fixedDate)
