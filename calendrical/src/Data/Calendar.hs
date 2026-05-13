@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-name-shadowing -Wno-unused-top-binds #-}
 -- __FIXME__: I think this is due to a GHC bug.
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
@@ -42,7 +43,6 @@ module Data.Calendar
     momentToReal,
     offset,
     positionsInRange,
-    rd,
     timeFromClock,
     timeFromMoment,
     validDate,
@@ -152,6 +152,9 @@ type IsoDateTime =
 -- -prop> let date = fromFixed rd' in rd' `elem` fixedsFrom date
 type CyclicCalendar :: Type -> Constraint
 class CyclicCalendar date where
+  type RD date :: Type
+  type RD _ = FixedDate
+
   -- | Even though cyclic calendars don’t necessarily have an “epoch” as such,
   --   this always exists as a starting point for calculating the cycles. If
   --   there isn’t a particularly significant value, then the cycle start
@@ -164,7 +167,7 @@ class CyclicCalendar date where
   --            mistakenly thought about the `Mayan` calendar), and so dates
   --            beyond that pon’t don’t exist. In either of these cases
   --           `fixedsFrom` would return a non-infinite result.
-  epoch :: proxy date -> FixedDate
+  epoch :: proxy date -> RD date
 
   fromFixed :: FixedDate -> date
   fromFixed = fromMoment . momentFrom
@@ -204,9 +207,6 @@ class (CyclicCalendar date, Ord date) => Calendar date where
 validDate :: (Calendar date) => date -> Bool
 validDate date = date == fromFixed (fixedFrom date)
 
-rd :: (Calendar date) => proxy date -> FixedDate -> Integer
-rd proxy d = offset d - offset (epoch proxy)
-
 instance CyclicCalendar FixedDate where
   epoch _ = RD 0
   fromFixed date = RD . dayNumberFromFixed date . epoch $ Identity date
@@ -221,17 +221,17 @@ newtype JulianDayNumber = JD {dayNumber :: Real}
   deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar JulianDayNumber where
-  -- (1.3)
-  epoch _ = RD -1721424 -- __FIXME__: Should be @-1721424.5@.
-  -- (1.5)
+  type RD JulianDayNumber = Moment
 
-  fromMoment (Moment t) =
-    JD $ t - rationalize (offset $ epoch (Proxy :: Proxy JulianDayNumber))
+  -- (1.3)
+  epoch _ = Moment -1721424.5
+
+  -- (1.5)
+  fromMoment t = JD . momentToReal $ t - epoch (Proxy :: Proxy JulianDayNumber)
 
 instance Calendar JulianDayNumber where
   -- (1.4)
-  momentFrom jd =
-    Moment $ dayNumber jd + rationalize (offset . epoch $ Identity jd)
+  momentFrom jd = Moment (dayNumber jd) + epoch (Identity jd)
 
 jd :: (Calendar date) => Integer -> date
 jd n = fromFixed . RD $ n - 1721425
