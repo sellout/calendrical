@@ -26,6 +26,7 @@ module CsvData.Common
 
     -- * Cell parsers
     stripCell,
+    parseInt,
     parseInteger,
     parseNatural,
     parseBoolean,
@@ -190,6 +191,11 @@ parseHolidayYearColumns header = mapMaybe build (zip [0 :: Int ..] header)
     build (i, cell) = case readMaybe (BSC.unpack cell) :: Maybe Integer of
       Just y -> Just (fromInteger y, i, i + 1)
       Nothing -> Nothing
+
+parseInt :: BS.ByteString -> Either String Int
+parseInt bs = case readMaybe (BSC.unpack (stripCell bs)) of
+  Just n -> Right n
+  Nothing -> Left ("expected int, got " <> show bs)
 
 parseInteger :: BS.ByteString -> Either String Integer
 parseInteger bs = case readMaybe (BSC.unpack (stripCell bs)) of

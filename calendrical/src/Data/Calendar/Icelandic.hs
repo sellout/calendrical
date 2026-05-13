@@ -1,5 +1,4 @@
 {-# LANGUAGE Safe #-}
-{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-name-shadowing #-}
 {-# OPTIONS_GHC -fplugin-opt=NoRecursion:ignore-decls:summer,winter #-}
 
@@ -11,9 +10,11 @@ module Data.Calendar.Icelandic
     Season (Summer, Winter),
     Week,
     Year,
+    angleFromSeason,
     isLeapYear,
     month,
     season,
+    seasonFromAngle,
     summer,
     week,
     weekday,
@@ -24,21 +25,16 @@ where
 
 import "base" Control.Applicative (pure)
 import "base" Control.Category ((.))
-import "base" Data.Bool (Bool (False, True))
-import "base" Data.Either (either)
+import "base" Data.Bool (Bool (True))
 import "base" Data.Eq (Eq, (/=), (==))
 import "base" Data.Function (($))
 import "base" Data.Kind (Type)
-import "base" Data.List (zip)
 import "base" Data.Maybe (Maybe (Nothing))
 import "base" Data.Ord (Ord, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
-import "base" Data.Tuple (uncurry)
-import "base" Text.Show (Show, show)
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
-import "mixed-radix" Numeric.MixedRadix (MixedIntegral)
-import "mixed-radix" Numeric.MixedRadix qualified as MixedRadix
 import "numeric-tangle" Numeric.Widen (widen)
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
@@ -56,14 +52,13 @@ import "this" Data.Calendar
     offset,
   )
 import "this" Data.Calendar.Gregorian qualified as Gregorian
-import "this" Data.Calendar.Types (Integer, sigma)
+import "this" Data.Calendar.Types (Angle, Integer)
 import "base" Prelude
   ( Bounded,
-    Enum,
     div,
-    error,
     floor,
     fromEnum,
+    fromInteger,
     fromIntegral,
     (*),
     (+),
@@ -77,10 +72,22 @@ type Season :: Type
 data Season
   = Summer
   | Winter
-  deriving stock (Bounded, Enum, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
+
+angleFromSeason :: Season -> Angle
+angleFromSeason = \case
+  -- (3.19)
+  Summer -> 90
+  -- (3.21)
+  Winter -> 270
+
+seasonFromAngle :: Angle -> Season
+seasonFromAngle angle =
+  let a = angle `mod` 360
+   in if a < 90 then Winter else if a < 270 then Summer else Winter
 
 type Week :: Type
-type Week = Fin (Nat.FromGHC 28)
+type Week = Fin (Nat.FromGHC 29)
 
 type Date :: Type
 data Date = Date
@@ -92,21 +99,9 @@ data Date = Date
   deriving stock (Eq, Ord, Show)
 
 summer :: Year -> FixedDate
-summer iYear = kdayOnOrAfter Thursday apr19
-  where
-    apr19 =
-      epoch (Proxy :: Proxy Date)
-        + RD (365 * (iYear - 1))
-        + RD (sigma (zip y a) $ uncurry (*))
-    y =
-      either (error . show) (`MixedRadix.toList` []) $
-        MixedRadix.interpret
-          @( MixedIntegral
-               '[Nat.FromGHC 4, Nat.FromGHC 25, Nat.FromGHC 4]
-               'False
-           )
-          iYear
-    a = [97, 24, 1, 0]
+summer iYear =
+  kdayOnOrAfter Thursday $
+    fixedFrom (Gregorian.Date (fromInteger iYear) Gregorian.April 19)
 
 winter :: Year -> FixedDate
 winter iYear = summer (iYear + 1) - 180

@@ -20,6 +20,7 @@ import CsvData.Common
     parseBoolean,
     parseDayOfWeek,
     parseFin,
+    parseInt,
     parseInteger,
     parseNatural,
     roundTrip,
@@ -631,12 +632,7 @@ icelandicDecoder = roundTrip parseI fromFixed fixedFrom
             }
       _ -> Left ("Icelandic: expected 4 cells, got " <> show cs)
     parseSeason :: ByteString -> Either String Icelandic.Season
-    parseSeason bs = do
-      n <- parseInteger bs
-      case n of
-        1 -> Right Icelandic.Summer
-        2 -> Right Icelandic.Winter
-        _ -> Left ("Icelandic Season must be 1|2, got " <> show n)
+    parseSeason = fmap Icelandic.seasonFromAngle . parseRational
     parseIcelandicWeekday :: ByteString -> Either String DayOfWeek
     parseIcelandicWeekday bs = do
       n <- parseInteger bs
