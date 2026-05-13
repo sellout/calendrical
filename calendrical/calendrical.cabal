@@ -215,6 +215,9 @@ test-suite csv-data
     tasty-hunit,
     text,
     vector,
+  ghc-options:
+    -O2
+    --num-threads $(nproc)
   other-modules:
     CsvData.Calendars
     CsvData.Common

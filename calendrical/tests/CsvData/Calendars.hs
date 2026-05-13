@@ -1,8 +1,8 @@
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE Safe #-}
 {-# LANGUAGE TypeApplications #-}
 
 -- |
--- Copyright: 2024 Greg Pfeil
+-- Copyright: 2026 Greg Pfeil
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 --
 -- Registry of column-group decoders for the CSV-driven test suite. To enable
@@ -394,7 +394,6 @@ calendarSpecs =
       }
   ]
 
-------------------------------------------------------------------------------
 -- Helpers
 
 parseRational :: ByteString -> Either String (Ratio Integer)
@@ -423,17 +422,16 @@ parseEnumFromZero bound bs = do
     then Right (toEnum (fromIntegral n - 1 :: Int))
     else Left ("enum value out of range 1.." <> show bound <> ": " <> show n)
 
+-- | The CSV uses 1-based week numbers in the range 1..bound, and Fin n stores
+--   0..n-1; the existing `parseFin` checks 0 <= n < bound, which matches a
+--   non-zero Week field.
 parseFinOneBased ::
   forall n.
   (Nat.SNatI n) =>
   ByteString ->
   Either String (Fin n)
-parseFinOneBased = parseFin -- the CSV uses 1-based week numbers in the
--- range 1..bound, and Fin n stores 0..n-1; the
--- existing parseFin checks 0 <= n < bound, which
--- matches a non-zero Week field.
+parseFinOneBased = parseFin
 
-------------------------------------------------------------------------------
 -- Framework-column decoders
 
 dayOfWeekDecoder :: Decoder
@@ -468,7 +466,6 @@ unixDecoder = roundTrip parseUnix (fromFixed @Unix) fixedFrom
       [c] -> fmap (SecondsSinceUnixEpoch . fromInteger) (parseInteger c)
       _ -> Left ("Unix: expected 1 cell, got " <> show cs)
 
-------------------------------------------------------------------------------
 -- Calendar decoders
 
 gregorianDecoder :: Decoder

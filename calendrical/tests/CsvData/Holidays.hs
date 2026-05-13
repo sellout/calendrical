@@ -1,7 +1,7 @@
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE Safe #-}
 
 -- |
--- Copyright: 2024 Greg Pfeil
+-- Copyright: 2026 Greg Pfeil
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 --
 -- Registry of holiday-function decoders, keyed by the @function@ column in

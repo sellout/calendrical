@@ -16,6 +16,8 @@ import "tasty" Test.Tasty
     localOption,
     testGroup,
   )
+import "this" CsvData.Calendars (calendarSpecs)
+import "this" CsvData.Common (loadDateCsv, multiFileTests)
 import "this" CsvData.Files.Dates (datesTests)
 import "this" CsvData.Files.Holiday (holidayFileTests)
 import "this" Paths_calendrical (getDataFileName)
@@ -29,14 +31,20 @@ testTimeout = Timeout 2000000 "2s"
 main :: IO ()
 main = do
   datesTrees <- traverse (loadOne datesTests) datesFiles
-  yearTrees <- traverse (loadOne datesTests) yearFiles
+  yearFilesLoaded <- traverse (loadOne loadDateCsv) yearFiles
   holidayPath <- getDataFileName "tests/data/holiday-list.csv"
   holidayTree <- holidayFileTests "holiday-list.csv" holidayPath
   defaultMain . localOption testTimeout $
     testGroup
       "csv-data"
       [ testGroup "dates*.csv" datesTrees,
-        testGroup "<year>.csv" yearTrees,
+        -- Year files all carry the full calendar set, so pivot one level
+        -- higher: top-level is the column-group, with a per-file subtree
+        -- underneath. A not-yet-implemented calendar appears as a single
+        -- IGNORED node for the whole @\<year\>.csv@ subtree.
+        testGroup
+          "<year>.csv"
+          (multiFileTests yearFilesLoaded calendarSpecs),
         holidayTree
       ]
   where

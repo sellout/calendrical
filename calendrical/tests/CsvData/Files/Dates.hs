@@ -1,7 +1,7 @@
 {-# LANGUAGE Trustworthy #-}
 
 -- |
--- Copyright: 2024 Greg Pfeil
+-- Copyright: 2026 Greg Pfeil
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 --
 -- Build a 'TestTree' for one @dates*.csv@ or @\<year\>.csv@ file. Both have
@@ -11,31 +11,23 @@ module CsvData.Files.Dates
   )
 where
 
-import CsvData.Calendars (calendarSpecs)
-import CsvData.Common (loadCsv, parseHeader1, rowTests)
-import "base" Control.Applicative (pure)
-import "base" Data.Function (($))
-import "base" Data.Functor (fmap)
-import "base" Data.List (length)
-import "base" Data.Semigroup ((<>))
-import "base" System.IO (FilePath, IO)
-import "base" Text.Show (show)
+import safe "base" Control.Applicative (pure)
+import safe "base" Control.Category ((.))
+import safe "base" Data.Function (($))
+import safe "base" Data.List (length)
+import safe "base" Data.Semigroup ((<>))
+import safe "base" System.IO (FilePath, IO)
+import safe "base" Text.Show (show)
 import "tasty" Test.Tasty (TestTree, testGroup)
 import "tasty-hunit" Test.Tasty.HUnit (assertFailure, testCase)
+import safe "this" CsvData.Calendars (calendarSpecs)
+import safe "this" CsvData.Common (fileTests, loadCsv, parseHeader1)
 
 datesTests :: FilePath -> FilePath -> IO TestTree
 datesTests label path = do
   rows <- loadCsv path
-  case rows of
+  pure case rows of
     h1 : _ : dataRows ->
-      pure $
-        testGroup
-          label
-          (fmap (rowTests (parseHeader1 h1) calendarSpecs) dataRows)
+      testGroup label $ fileTests (parseHeader1 h1) calendarSpecs dataRows
     _ ->
-      pure $
-        testCase
-          label
-          ( assertFailure
-              ("expected 2-row header + data, got " <> show (length rows))
-          )
+      testCase label . assertFailure $ "expected 2-row header + data, got " <> show (length rows)
