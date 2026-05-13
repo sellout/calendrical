@@ -647,7 +647,7 @@ islamicDecoder = roundTrip parseI fromFixed fixedFrom
     parseI cs = case cs of
       [yc, mc, dc] -> do
         y <- parseInteger yc
-        m <- parseEnumFromZero @Islamic.Month 12 mc
+        m <- parseEnumFromOne @Islamic.Month 12 mc
         d <- parseFin dc
         Right
           Islamic.Date

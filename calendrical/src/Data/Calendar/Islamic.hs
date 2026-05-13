@@ -45,7 +45,7 @@ import "this" Data.Calendar
   )
 import "this" Data.Calendar.Gregorian qualified as Gregorian
 import "this" Data.Calendar.Julian qualified as Julian
-import "this" Data.Calendar.Types (Integer)
+import "this" Data.Calendar.Types (Integer, ModularEnum, modularToEnum)
 import "base" Prelude
   ( Bounded,
     Enum,
@@ -80,7 +80,37 @@ data Month
   | Shawwal
   | DhuAlQa'da
   | DhuAlHijja
-  deriving stock (Bounded, Enum, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Show)
+
+instance Enum Month where
+  fromEnum = \case
+    Muharram -> 1
+    Safar -> 2
+    Rabi'I -> 3
+    Rabi'II -> 4
+    JumadaI -> 5
+    JumadaII -> 6
+    Rajab -> 7
+    Sha'ban -> 8
+    Ramadan -> 9
+    Shawwal -> 10
+    DhuAlQa'da -> 11
+    DhuAlHijja -> 12
+  toEnum i = case modularToEnum (Proxy :: Proxy Month) i of
+    1 -> Muharram
+    2 -> Safar
+    3 -> Rabi'I
+    4 -> Rabi'II
+    5 -> JumadaI
+    6 -> JumadaII
+    7 -> Rajab
+    8 -> Sha'ban
+    9 -> Ramadan
+    10 -> Shawwal
+    11 -> DhuAlQa'da
+    _ -> DhuAlHijja
+
+instance ModularEnum Month
 
 type Day :: Type
 type Day = Fin (Nat.FromGHC 31)
