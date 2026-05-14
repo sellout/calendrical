@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   width="70mm"
+   height="30mm"
+   id="svg2">
+  <defs
+     id="defs4" />
+  <g
+     style="display:inline"
+     id="layer1">
+    <g
+       transform="translate(-8.858286,8.858267)"
+       id="g2288">
+      <rect
+         width="88.58268"
+         height="17.716536"
+         x="88.582687"
+         y="-3.0036986e-06"
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.77165353;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect_integer" />
+      <a
+         xlink:href="http://en.wikipedia.org/wiki/Integer"
+         transform="translate(-177.1653,-77.95274)"
+         id="a2264">
+        <text
+           x="309.69952"
+           y="89.85202"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
+           id="text_integer"
+           xml:space="preserve"><tspan
+             x="309.69952"
+             y="89.85202"
+             id="tspan2208">Integer</tspan></text>
+      </a>
+      <rect
+         width="124.01578"
+         height="17.716536"
+         x="70.866135"
+         y="17.716526"
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.77165353;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect_rational" />
+      <a
+         xlink:href="http://en.wikipedia.org/wiki/Rational_number"
+         transform="translate(-177.1653,-77.95274)"
+         id="a2268">
+        <text
+           x="309.69952"
+           y="107.56855"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
+           id="text_rational"
+           xml:space="preserve"><tspan
+             x="309.69952"
+             y="107.56855"
+             id="tspan2223">Rational</tspan></text>
+      </a>
+      <rect
+         width="159.44879"
+         height="17.716536"
+         x="53.149632"
+         y="35.433064"
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.77165353;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect_real" />
+      <a
+         xlink:href="http://en.wikipedia.org/wiki/Real_number"
+         transform="translate(-177.1653,-77.95274)"
+         id="a2276">
+        <text
+           x="309.69952"
+           y="125.28509"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
+           id="text_real"
+           xml:space="preserve"><tspan
+             x="309.69952"
+             y="125.28509"
+             id="tspan2231">Real</tspan></text>
+      </a>
+      <rect
+         width="194.88187"
+         height="17.716536"
+         x="35.433094"
+         y="53.149601"
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.77165353;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect_complex" />
+      <a
+         xlink:href="http://en.wikipedia.org/wiki/Complex_number"
+         transform="translate(-177.1653,-77.95274)"
+         id="a2280">
+        <text
+           x="309.69952"
+           y="143.00162"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
+           id="text_complex"
+           xml:space="preserve"><tspan
+             x="309.69952"
+             y="143.00162"
+             id="tspan2239">Complex</tspan></text>
+      </a>
+      <rect
+         width="230.31493"
+         height="17.716536"
+         x="17.71657"
+         y="70.866142"
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.77165353;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect_number" />
+      <a
+         xlink:href="http://en.wikipedia.org/wiki/Number"
+         transform="translate(-177.1653,-77.95274)"
+         id="a2284">
+        <text
+           x="309.69952"
+           y="160.71815"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
+           id="text_number"
+           xml:space="preserve"><tspan
+             x="309.69952"
+             y="160.71815"
+             id="tspan2247">Number</tspan></text>
+      </a>
+    </g>
+  </g>
+</svg>

@@ -5,6 +5,14 @@
 
 This is a play on Scheme’s [numerical tower](https://en.wikipedia.org/wiki/Numerical_tower).
 
+Here is Scheme’s numerical tower:
+![](NumericalTower.svg)
+(Created by [Xyzzy_n](https://commons.wikimedia.org/wiki/File:NumericalTower.svg) and licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en))
+
+and here is Haskell’s `Numeric` tangle:
+
+![](Haskell numeric tangle.png)
+
 ## usage
 
 ## versioning
