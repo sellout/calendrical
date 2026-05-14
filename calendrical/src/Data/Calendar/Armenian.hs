@@ -27,6 +27,7 @@ import "this" Data.Calendar
   )
 import "this" Data.Calendar.Twelve30Plus5 (Day, Year, date', day, month, year)
 import "this" Data.Calendar.Twelve30Plus5 qualified as T30P5
+import "this" Data.Calendar.Types (ModularEnum)
 import "base" Prelude (Bounded, Enum)
 
 type Month :: Type
@@ -43,8 +44,10 @@ data Month
   | Mareri
   | Margach
   | Hrotich
-  | Unnamed
+  | Aweleach
   deriving stock (Bounded, Enum, Eq, Ord, Read, Show)
+
+instance ModularEnum Month
 
 type Date :: Type
 type Date = T30P5.Date Month

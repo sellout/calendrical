@@ -24,9 +24,8 @@ import "base" Data.Kind (Type)
 import "base" Data.List.NonEmpty (NonEmpty ((:|)))
 import "base" Data.Ord (Ord)
 import "base" Data.Proxy (Proxy (Proxy))
-import "base" Data.Semigroup ((<>))
 import "base" Text.Read (Read)
-import "base" Text.Show (Show, show)
+import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( CyclicCalendar,
     FixedDate (RD),
@@ -39,11 +38,11 @@ import "this" Data.Calendar
     modI,
     offset,
   )
+import "this" Data.Calendar.Types (ModularEnum, modularToEnum)
 import "base" Prelude
   ( Bounded,
     Enum,
     Integer,
-    error,
     floor,
     fromEnum,
     fromIntegral,
@@ -71,14 +70,15 @@ instance Enum Prefix where
     Kwa -> 4
     Mono -> 5
     Fo -> 6
-  toEnum = \case
+  toEnum i = case modularToEnum (Proxy :: Proxy Prefix) i of
     1 -> Nwona
     2 -> Nkyi
     3 -> Kuru
     4 -> Kwa
     5 -> Mono
-    6 -> Fo
-    n -> error $ "invalid Akan day prefix: " <> show n
+    _ -> Fo
+
+instance ModularEnum Prefix
 
 type Stem :: Type
 data Stem
@@ -100,15 +100,16 @@ instance Enum Stem where
     Kwasi -> 5
     Dwo -> 6
     Bene -> 7
-  toEnum = \case
+  toEnum i = case modularToEnum (Proxy :: Proxy Stem) i of
     1 -> Wukuo
     2 -> Yaw
     3 -> Fie
     4 -> Memene
     5 -> Kwasi
     6 -> Dwo
-    7 -> Bene
-    n -> error $ "invalid Akan day stem: " <> show n
+    _ -> Bene
+
+instance ModularEnum Stem
 
 type Name :: Type
 data Name = Name {prefix :: Prefix, stem :: Stem}
