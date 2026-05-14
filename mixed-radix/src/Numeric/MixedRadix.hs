@@ -2,6 +2,9 @@
 {-# LANGUAGE Safe #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- GHC (at least 9.10.3) seems to think the `SafeMixy` constraint on @default
+-- `interpret'`@ is redundant, but it’s definitely not.
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- |
 -- Copyright: 2024 Greg Pfeil
@@ -48,6 +51,8 @@ module Numeric.MixedRadix
     interpret,
     render,
     toList,
+    SafeMixy,
+    safeInterpret,
     zeroIntegral,
 
     -- * __TODO__: exported for debugging, delete later
@@ -57,7 +62,7 @@ where
 
 import "base" Control.Applicative (pure, (<*>))
 import "base" Control.Category (id, (.))
-import "base" Data.Bifunctor (bimap)
+import "base" Data.Bifunctor (bimap, first)
 import "base" Data.Bitraversable (bitraverse)
 import "base" Data.Bool (Bool (False, True), (&&))
 import "base" Data.Either (Either (Left))
@@ -65,7 +70,7 @@ import "base" Data.Eq (Eq, (==))
 import "base" Data.Function (flip, ($))
 import "base" Data.Functor (fmap, (<$>))
 import "base" Data.Kind (Constraint, Type)
-import "base" Data.Maybe (Maybe (Just, Nothing), maybe)
+import "base" Data.Maybe (Maybe (Just, Nothing), fromMaybe)
 import "base" Data.Monoid ((<>))
 import "base" Data.Ord (Ord, Ordering (EQ), compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
@@ -95,6 +100,7 @@ import "base" Prelude
     realToFrac,
     round,
     toEnum,
+    toInteger,
     toRational,
     (*),
     (+),
@@ -184,6 +190,8 @@ class Mixy m c | m -> c where
   -- | Interpret a value constrained by @c@ as a mixed-radix number. The first
   --   parameter is a scaling factor.
   interpret' :: (c n) => n -> n -> Either FloatFailure m
+  default interpret' :: (SafeMixy m c, c n) => n -> n -> Either FloatFailure m
+  interpret' scale = pure . safeInterpret' scale
 
   -- | Generally what you want instead of `interpret'` – it defaults the scaling
   --   factor to @1@.
@@ -195,6 +203,17 @@ class Mixy m c | m -> c where
 
   -- | Returns the components as a list, all expanded to the same type.
   toList :: (c n) => m -> [n] -> [n]
+
+type SafeMixy :: Type -> (Type -> Constraint) -> Constraint
+class (Mixy m c) => SafeMixy m c where
+  -- | Interpret a value constrained by @c@ as a mixed-radix number. The first
+  --   parameter is a scaling factor.
+  safeInterpret' :: (c n) => n -> n -> m
+
+  -- | Generally what you want instead of `interpret'` – it defaults the scaling
+  --   factor to @1@.
+  safeInterpret :: (Num n, c n) => n -> m
+  safeInterpret = safeInterpret' 1
 
 -- Bounded
 
@@ -247,9 +266,11 @@ instance (Eq (MixedIntegral is b)) => Eq (MixedIntegral (i ': is) b) where
 
 instance Mixy (MixedIntegral '[] 'False) Integral where
   eval (Unbounded n) = fromIntegral n
-  interpret' placeValue = pure . Unbounded . fromIntegral . (* placeValue)
   render (Unbounded n) = show n
   toList (Unbounded n) = (fromIntegral n :)
+
+instance SafeMixy (MixedIntegral '[] 'False) Integral where
+  safeInterpret' _placeValue = Unbounded . toInteger
 
 instance Mixy (MixedIntegral '[] 'True) Integral where
   eval ZeroRadix = 0
@@ -259,6 +280,17 @@ instance Mixy (MixedIntegral '[] 'True) Integral where
     _ -> Left FracOverflow -- FIXME: Give new error case?
   render ZeroRadix = ""
   toList ZeroRadix = id
+
+-- | A tighter modulus, since we can guarantee that it must fit into a `Fin`
+--   with the modulus as its bound.
+--
+--  __TODO__: Implement this without `error`.
+divModFin :: (Integral a, SNatI n) => a -> proxy n -> (a, Fin n)
+divModFin n d =
+  fromMaybe (error "impossible: The modulus is greater than the `Fin` bound")
+    . Fin.fromNat
+    . fromIntegral
+    <$> n `divMod` Nat.reflectToNum d
 
 instance
   (SNatI a, Mixy (MixedIntegral as b) Integral) =>
@@ -271,11 +303,20 @@ instance
      in fmap (uncurry $ flip IntRadix)
           . bitraverse
             (interpret' $ placeValue * radix)
-            (maybe (Left FracOverflow) pure . Fin.fromNat . fromIntegral)
-          . (`divMod` radix)
-          . (* placeValue)
+            pure
+          . (`divModFin` (Proxy :: Proxy a))
   render (IntRadix n prev) = render prev <> ", " <> show n
   toList (IntRadix n r) = toList r . (fromIntegral n :)
+
+instance
+  (SNatI a, SafeMixy (MixedIntegral as b) Integral) =>
+  SafeMixy (MixedIntegral (a ': as) b) Integral
+  where
+  safeInterpret' placeValue =
+    uncurry (flip IntRadix)
+      . first
+        (safeInterpret' $ placeValue * Nat.reflectToNum (Proxy :: Proxy a))
+      . (`divModFin` (Proxy :: Proxy a))
 
 instance (SNatI a, Show n, RealFrac n) => Mixy (MixedRadix '[] 'True '[a] ('Just n)) RealFrac where
   eval = \case

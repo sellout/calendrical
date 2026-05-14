@@ -25,10 +25,11 @@ import CsvData.Common
     roundTrip,
     stripCell,
   )
+import "base" Control.Applicative ((<*>))
 import "base" Control.Category ((.))
 import "base" Data.Bool (Bool, (&&))
 import "base" Data.Either (Either (Left, Right), either)
-import "base" Data.Functor (fmap)
+import "base" Data.Functor (fmap, (<$>))
 import "base" Data.Int (Int)
 import "base" Data.Maybe (Maybe (Just, Nothing))
 import "base" Data.Ord ((<=))
@@ -61,6 +62,7 @@ import "calendrical" Data.Calendar.Islamic qualified as Islamic
 import "calendrical" Data.Calendar.Iso qualified as Iso
 import "calendrical" Data.Calendar.Julian qualified as Julian
 import "calendrical" Data.Calendar.Julian.Olympiad qualified as Olympiad
+import "calendrical" Data.Calendar.Mayan.LongCount qualified as MayanLongCount
 import "calendrical" Data.Calendar.Twelve30Plus5 qualified as T30P5
 import "fin" Data.Fin (Fin)
 import "fin" Data.Fin qualified as Fin
@@ -238,7 +240,7 @@ calendarSpecs =
     CalendarSpec
       { groupName = "Mayan Long Count",
         fields = ["Baktun", "Katun", "Tun", "Uinal", "Kin"],
-        decoder = Nothing
+        decoder = Just mayanLongCountDecoder
       },
     CalendarSpec
       { groupName = "Mayan Haab",
@@ -711,3 +713,17 @@ oldHinduLunarDecoder = fromFixedOnly parseL derive
             HinduOldLunar.leap d,
             Fin.toInteger (HinduOldLunar.day d)
           )
+
+mayanLongCountDecoder :: Decoder
+mayanLongCountDecoder = roundTrip parseLC fromFixed fixedFrom
+  where
+    parseLC :: [ByteString] -> Either String MayanLongCount.Date
+    parseLC cs = case cs of
+      [b, kt, t, u, k] ->
+        MayanLongCount.date
+          <$> parseInteger b
+          <*> parseFin kt
+          <*> parseFin t
+          <*> parseFin u
+          <*> parseFin k
+      _ -> Left ("Mayan Long Count: expected 5 cells, got " <> show cs)

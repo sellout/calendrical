@@ -195,6 +195,8 @@ library
     Data.Calendar.Julian
     Data.Calendar.Julian.Olympiad
     Data.Calendar.Julian.Season
+    Data.Calendar.Mayan
+    Data.Calendar.Mayan.LongCount
     Data.Calendar.SimpleLeapCycle
     Data.Calendar.Twelve30Plus5
     Data.Calendar.Twelve30Plus5.Leap
