@@ -32,6 +32,7 @@ import "base" Data.Kind (Type)
 import "base" Data.Maybe (Maybe (Nothing))
 import "base" Data.Ord (Ord, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
+import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat

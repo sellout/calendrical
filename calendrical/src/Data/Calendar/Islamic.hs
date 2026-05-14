@@ -26,6 +26,7 @@ import "base" Data.Functor (fmap)
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, (<))
 import "base" Data.Proxy (Proxy (Proxy))
+import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
@@ -80,7 +81,7 @@ data Month
   | Shawwal
   | DhuAlQa'da
   | DhuAlHijja
-  deriving stock (Bounded, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Month where
   fromEnum = \case

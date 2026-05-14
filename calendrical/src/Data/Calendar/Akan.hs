@@ -25,6 +25,7 @@ import "base" Data.List.NonEmpty (NonEmpty ((:|)))
 import "base" Data.Ord (Ord)
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Semigroup ((<>))
+import "base" Text.Read (Read)
 import "base" Text.Show (Show, show)
 import "this" Data.Calendar
   ( CyclicCalendar,
@@ -60,7 +61,7 @@ data Prefix
   | Kwa
   | Mono
   | Fo
-  deriving stock (Bounded, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Prefix where
   fromEnum = \case
@@ -88,7 +89,7 @@ data Stem
   | Kwasi
   | Dwo
   | Bene
-  deriving stock (Bounded, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Stem where
   fromEnum = \case
@@ -111,7 +112,7 @@ instance Enum Stem where
 
 type Name :: Type
 data Name = Name {prefix :: Prefix, stem :: Stem}
-  deriving stock (Eq, Ord, Show)
+  deriving stock (Eq, Ord, Read, Show)
 
 dayName :: Integer -> Name
 dayName n =

@@ -40,6 +40,7 @@ import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
+import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
@@ -85,7 +86,7 @@ type Year :: Type
 data Year
   = BCE PositiveInteger
   | CE PositiveInteger
-  deriving stock (Eq, Show)
+  deriving stock (Eq, Read, Show)
 
 instance Ord Year where
   compare a b = compare (yearToInteger a) $ yearToInteger b
@@ -158,7 +159,7 @@ data Event
   = Kalends
   | Nones
   | Ides
-  deriving stock (Bounded, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 idesOfMonth :: Month -> Day
 idesOfMonth month = if month `elem` [March, May, July, October] then 15 else 13

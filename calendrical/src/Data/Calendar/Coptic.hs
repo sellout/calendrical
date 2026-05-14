@@ -21,6 +21,7 @@ import "base" Data.Functor (fmap)
 import "base" Data.Kind (Type)
 import "base" Data.Maybe (maybe)
 import "base" Data.Ord (Ord)
+import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( Calendar,
@@ -62,7 +63,7 @@ data Month
   | Epep
   | Mesore
   | Epagomene
-  deriving stock (Bounded, Enum, Eq, Ord, Show)
+  deriving stock (Bounded, Enum, Eq, Ord, Read, Show)
 
 type Date :: Type
 type Date = T30P5.Date Month

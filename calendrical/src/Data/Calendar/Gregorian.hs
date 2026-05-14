@@ -54,6 +54,7 @@ import "base" Data.Ord (Ord, Ordering (EQ, GT, LT), compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
 import "base" Data.Tuple (fst, snd, uncurry)
+import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
@@ -116,7 +117,7 @@ data Month
   | October
   | November
   | December
-  deriving stock (Bounded, Eq, Ord, Show)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Month where
   fromEnum = \case
@@ -191,7 +192,7 @@ instance Calendar Date where
 type Year :: Type
 newtype Year = Year {yearToInteger :: Integer}
   deriving newtype (Eq, Ord, Num)
-  deriving stock (Show)
+  deriving stock (Read, Show)
 
 isLeapYear :: Year -> Bool
 isLeapYear (Year gYear) =
