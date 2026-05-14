@@ -174,6 +174,7 @@ library
     -- in GHC 9.12.
     -Wno-inferred-safe-imports
   exposed-modules:
+    Numeric.Ration.Instances.Fin
     Numeric.Widen.Instances.Fin
 
 test-suite doctests
