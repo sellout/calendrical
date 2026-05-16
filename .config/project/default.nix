@@ -93,7 +93,10 @@
       calendrical = "calendrical";
     };
     ## Used by Nix builds, but not by GitHub.
-    checkBounds.extraDependencyVersions = ["doctest-0.24.0"];
+    checkBounds.extraDependencyVersions = [
+      "QuickCheck-2.15.0"
+      "doctest-0.24.0"
+    ];
     ## The latest Stackage LTS that we also build on GitHub for.
     latestGhcVersion = "9.10.1";
   };

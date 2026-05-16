@@ -202,9 +202,9 @@ test-suite doctests
     tests
   main-is: doctests.hs
   build-depends:
-    QuickCheck ^>= {2.14.2, 2.15.0},
+    QuickCheck ^>= {2.14.2, 2.15.0, 2.18.0},
     calendrical,
-    doctest ^>= {0.21.1, 0.22.2, 0.23.0, 0.24.0},
+    doctest ^>= {0.21.1, 0.22.2, 0.23.0, 0.24.0, 0.25.0},
   -- NB: Adjust this to contain any components that may have doctests (including
   --     executables).
   x-doctest-components:
