@@ -1,6 +1,8 @@
 {-# LANGUAGE Safe #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+-- We want to “overconstrain” these instances, to avoid “wrapping”.
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 -- This allows the deep `Fin` depths to compile.
 {-# OPTIONS_GHC -freduction-depth=0 #-}
 
