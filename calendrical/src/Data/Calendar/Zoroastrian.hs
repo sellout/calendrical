@@ -15,8 +15,8 @@ import "base" Data.Function (($))
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord)
 import "this" Data.Calendar
-  ( Calendar,
-    CyclicCalendar,
+  ( LinearCalendar,
+    Calendar,
     FixedDate (RD),
     epoch,
     fixedFrom,
@@ -50,10 +50,10 @@ type Date = T30P5.Date Month
 ops :: T30P5.Operations Month
 ops = T30P5.operationsForEpoch $ RD 230638
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = T30P5.epoch ops
   fromFixed = T30P5.fromFixed ops
   fromMoment = T30P5.fromMoment ops
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom = T30P5.fixedFrom ops

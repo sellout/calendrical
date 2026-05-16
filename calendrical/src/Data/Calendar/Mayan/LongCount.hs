@@ -25,8 +25,8 @@ import "mixed-radix" Numeric.MixedRadix (MixedIntegral (IntRadix, Unbounded), ev
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     epoch,
     fixedFrom,
@@ -54,14 +54,14 @@ newtype Date
   = Date (MixedIntegral '[KinBound, UinalBound, TunBound, KatunBound] 'False)
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = Mayan.epoch
 
   -- (11.3)
   fromFixed rd = Date . safeInterpret . offset $ rd - Mayan.epoch
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   -- (11.2)
   fixedFrom (Date d) = Mayan.epoch + RD (eval d)
 

@@ -18,8 +18,8 @@ import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     FixedDate (RD),
+    LinearCalendar,
     epoch,
     fixedFrom,
     fromFixed,
@@ -55,10 +55,10 @@ type Date = T30P5.Date Month
 ops :: T30P5.Operations Month
 ops = T30P5.operationsForEpoch $ RD 201443
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = T30P5.epoch ops
   fromFixed = T30P5.fromFixed ops
   fromMoment = T30P5.fromMoment ops
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom = T30P5.fixedFrom ops

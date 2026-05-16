@@ -48,8 +48,8 @@ import "numeric-tangle" Numeric.Abs (splitAbs)
 import "numeric-tangle" Numeric.Chop (floor)
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
-  ( Calendar,
-    CyclicCalendar,
+  ( LinearCalendar,
+    Calendar,
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -121,7 +121,7 @@ type Date :: Type
 data Date = Date {year :: Year, month :: Month, day :: Day}
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = RD (-1)
   fromFixed date = Date year month day
     where
@@ -137,7 +137,7 @@ instance CyclicCalendar Date where
       day = fromIntegral (offset $ date - fixedFrom (Date year month 1)) + 1
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, month, day} =
     RD $
       offset (epoch (Proxy :: Proxy Date))
@@ -177,7 +177,7 @@ data RomanDate = RomanDate
   }
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar RomanDate where
+instance Calendar RomanDate where
   epoch _ = epoch (Proxy :: Proxy Date)
   fromFixed date
     | day == 1 = RomanDate year month Kalends 1 False
@@ -217,7 +217,7 @@ instance CyclicCalendar RomanDate where
       kalends1 = fixedFrom $ RomanDate year' month' Kalends 1 False
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar RomanDate where
+instance LinearCalendar RomanDate where
   fixedFrom RomanDate {yearR, monthR, event, count, leap} =
     ( case event of
         Kalends -> fixedFrom $ Date yearR monthR 1

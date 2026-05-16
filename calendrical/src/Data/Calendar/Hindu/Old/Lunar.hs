@@ -35,8 +35,8 @@ import "numeric-tangle" Numeric.Ration (rationalize, (%))
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     epoch,
     fixedFrom,
@@ -148,7 +148,7 @@ isLeapYear lYear =
   (rationalize lYear * Solar.aryaYear - Solar.aryaMonth) `mod` aryaMonth
     >= widen ((23902504679 :: Natural) % 1282400064)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = Hindu.epoch
   fromFixed date = Date {year, month, leap, day}
     where
@@ -162,7 +162,7 @@ instance CyclicCalendar Date where
       year = ceiling ((newMoon + Solar.aryaMonth) % Solar.aryaYear) - 1
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, month, leap, day} =
     RD . ceiling $
       rationalize (offset $ epoch (Proxy :: Proxy Date))

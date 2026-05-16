@@ -27,7 +27,7 @@ import "base" Data.Proxy (Proxy (Proxy))
 import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "this" Data.Calendar
-  ( CyclicCalendar,
+  ( Calendar,
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -127,7 +127,7 @@ nameDifference day1 day2 =
     prefixDifference = fromIntegral $ fromEnum (prefix day2) - fromEnum (prefix day1)
     stemDifference = fromIntegral $ fromEnum (stem day2) - fromEnum (stem day1)
 
-instance CyclicCalendar Name where
+instance Calendar Name where
   epoch _ = RD 37
   fromFixed (RD date) = dayName (date - offset (epoch (Proxy :: Proxy Name)))
   fromMoment (Moment t) = fromFixed . RD $ floor t

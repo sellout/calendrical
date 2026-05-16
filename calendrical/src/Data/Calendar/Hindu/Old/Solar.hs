@@ -32,8 +32,8 @@ import "numeric-tangle" Numeric.Ration (rationalize, (%))
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     epoch,
     fixedFrom,
@@ -175,7 +175,7 @@ type Date :: Type
 data Date = Date {year :: Year, month :: Month, day :: Day}
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = Hindu.epoch
   fromFixed date = Date {year, month, day}
     where
@@ -185,7 +185,7 @@ instance CyclicCalendar Date where
       day = floor (sun `mod` aryaMonth) + 1
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, month, day} =
     RD . ceiling $
       rationalize (offset $ epoch (Proxy :: Proxy Date)) -- Since start of era.

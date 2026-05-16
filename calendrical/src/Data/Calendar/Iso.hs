@@ -26,8 +26,8 @@ import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
-  ( Calendar,
-    CyclicCalendar,
+  ( LinearCalendar,
+    Calendar,
     DayOfWeek (Sunday, Thursday),
     FixedDate (RD),
     Moment (Moment),
@@ -52,7 +52,7 @@ type Date :: Type
 data Date = Date {year :: Year, week :: Week, day :: Day}
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = epoch (Proxy :: Proxy Gregorian.Date)
   fromFixed date = Date {year, week, day}
     where
@@ -67,7 +67,7 @@ instance CyclicCalendar Date where
       day = toEnum . fromIntegral $ offset (date - RD 0) `mod1` 7
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, week, day} =
     Gregorian.nthKday
       (widen week)

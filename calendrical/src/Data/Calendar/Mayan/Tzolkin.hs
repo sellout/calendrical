@@ -38,7 +38,7 @@ import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Chop (floor)
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
-  ( CyclicCalendar,
+  ( Calendar,
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -167,7 +167,7 @@ ordinal Date {number, name} =
    in widen . Haab.finMod @(Nat.FromGHC 260) $
         signedNumber - 1 + 39 * (signedNumber - widen (fromEnum name))
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   -- (11.8)
   epoch _ = Mayan.epoch - RD (widen . ordinal $ Date 4 Ahau)
 

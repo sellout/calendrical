@@ -61,8 +61,8 @@ import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
-  ( Calendar,
-    CyclicCalendar,
+  ( LinearCalendar,
+    Calendar,
     DayOfWeek (Friday, Monday, Sunday, Tuesday),
     FixedDate (RD),
     Moment (Moment),
@@ -157,7 +157,7 @@ data Date = Date
   {year :: Year, month :: Month, day :: Day}
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = RD 1
   fromFixed date = Date {year, month, day}
     where
@@ -172,7 +172,7 @@ instance CyclicCalendar Date where
       day = fromIntegral . offset $ date - fixedFrom (Date year month 1) + 1
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, month, day} =
     RD $
       offset (epoch (Proxy :: Proxy Date))
