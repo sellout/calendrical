@@ -1,5 +1,6 @@
 # Mixed-Radix numbers
 
+[![Hackage Version](https://img.shields.io/hackage/v/mixed-radix)](https://hackage.haskell.org/package/mixed-radix)
 [![Packaging status](https://repology.org/badge/tiny-repos/haskell:mixed-radix.svg)](https://repology.org/project/haskell:mixed-radix/versions)
 [![latest packaged versions](https://repology.org/badge/latest-versions/haskell:mixed-radix.svg)](https://repology.org/project/haskell:mixed-radix/versions)
 
@@ -87,7 +88,7 @@ Yes, in development, `-Werror` is often (and should be) used. However, that just
 
 ## licensing
 
-This package is licensed under [The GNU AGPL 3.0 only](./LICENSE). If you need a license for usage that isn’t covered under the AGPL, please contact [Greg Pfeil](mailto:greg@technomadic.org?subject=licensing%20calendrical).
+This package is licensed under [The GNU AGPL 3.0 only](./LICENSE). If you need a license for usage that isn’t covered under the AGPL, please contact [Greg Pfeil](mailto:greg@technomadic.org?subject=licensing%20mixed-radix).
 
 You should review the [license report](docs/license-report.md) for details about dependency licenses.
 

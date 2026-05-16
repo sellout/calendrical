@@ -1,4 +1,4 @@
-# Calendrical
+# calendrical
 
 [![built with garnix](https://img.shields.io/endpoint?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fsellout%2Fcalendrical)](https://garnix.io/repo/sellout/calendrical)
 [![GitHub CI](https://github.com/sellout/calendrical/actions/workflows/build.yml/badge.svg)](https://github.com/sellout/calendrical/actions/workflows/build.yml)
@@ -7,7 +7,7 @@
 
 Comprehensive date & time library
 
-An implementation of many calendaring and time systems, based on the book “Calendrical Calculations”.
+An implementation of many calendaring and time systems, based on the book [_Calendrical Calculations_](https://www.cs.tau.ac.il/~nachum/calendar-book/index.shtml).
 
 The book provides a lot of mathematical functions and includes a Common Lisp implementation, but there are various changes made for the Haskell version:
 
@@ -101,4 +101,4 @@ If you don’t use Nix, you will need to mention that in your PR so that one of 
 
 ## comparisons
 
-See [the package README](./calendrical/README.md) for comparisons with other similar projects.
+See [the package README](./core/README.md) for comparisons with other similar projects.

@@ -9,20 +9,59 @@
   project = {
     name = "calendrical";
     summary = "Comprehensive date & time library";
-    ## TODO: Move something like this to Flaky.
     file = let
-      copyLicenses = dir: {
+      ## Cabal requires many files to exist at the package level, rather than
+      ## the repo level. This makes copies of the individual files into the
+      ## package directory.
+      ##
+      ## TODO: Move something like this to Flaky.
+      perPackageFiles = dir: {
         "${dir}/LICENSE".source = ../../LICENSE;
         "${dir}/LICENSE.AGPL-3.0-only".source = ../../LICENSE.AGPL-3.0-only;
         "${dir}/LICENSE.Universal-FOSS-exception-1.0".source =
           ../../LICENSE.Universal-FOSS-exception-1.0;
-        "${dir}/LICENSE.commercial".source = ../../LICENSE.commercial;
+        "${dir}/LICENSE.proprietary".source = ../../LICENSE.proprietary;
+        ## We might want to put this somewhere else (like .config/henforcer/),
+        ## but that isn’t currently an option, because of flipstone/henforcer#7.
+        "${dir}/henforcer.toml".text =
+          lib.pm.generators.toTOML {} {
+            globalSection = {};
+            sections = {
+              forAnyModule = {
+                ## doesn’t yet support nested attr sets
+                # allowedAliasUniqueness.allAliasesUniqueExcept = [];
+                maximumExportsPlusHeaderUndocumented = 0;
+                maximumExportsWithoutSince = 0;
+                moduleHeaderCopyrightMustExistNonEmpty = true;
+                ## We want to require a description, but just a “normal”
+                ## description, not the header field.
+                moduleHeaderDescriptionMustExistNonEmpty = false;
+                moduleHeaderLicenseMustExistNonEmpty = true;
+              };
+            };
+          }
+          ## NB: `toTOML` is really just an INI generator, so it can’t handle a
+          ##     lot of syntax. This tacks some bits onto the end that the INI
+          ##     generator does’t like.
+          + ''
+            # Exclude auto-generated `Paths` module
+            [[forPatternModules]]
+            pattern = "Paths_*"
+            [forPatternModules.rulesToIgnore]
+            all = true
+
+            # Exclude auto-generated `Build_doctests` module
+            [[forSpecifiedModules]]
+            module = "Build_doctests"
+            [forSpecifiedModules.rulesToIgnore]
+            all = true
+          '';
       };
     in
-      copyLicenses "calendrical"
-      // copyLicenses "mixed-radix"
-      // copyLicenses "numeric-tangle"
-      // copyLicenses "numeric-tangle-fin";
+      perPackageFiles "calendrical"
+      // perPackageFiles "mixed-radix"
+      // perPackageFiles "numeric-tangle"
+      // perPackageFiles "numeric-tangle-fin";
   };
 
   imports = [./hlint.nix];
@@ -55,6 +94,7 @@
     };
     ## Used by Nix builds, but not by GitHub.
     checkBounds.extraDependencyVersions = ["doctest-0.24.0"];
+    ## The latest Stackage LTS that we also build on GitHub for.
     latestGhcVersion = "9.10.1";
   };
 
