@@ -13,6 +13,7 @@
 module Data.Calendar
   ( LinearCalendar,
     Calendar,
+    CyclicCalendar,
     DayOfWeek (Friday, Monday, Saturday, Sunday, Thursday, Tuesday, Wednesday),
     Interval,
     JulianDayNumber (JD),
@@ -37,11 +38,11 @@ module Data.Calendar
     kdayBefore,
     kdayNearest,
     kdayOnOrAfter,
-    kdayOnOrBefore,
     listRange,
     momentFrom,
     momentToReal,
     offset,
+    onOrBefore,
     positionsInRange,
     timeFromClock,
     timeFromMoment,
@@ -150,6 +151,9 @@ type IsoDateTime =
 --   multiple dates to the same name. A simple example is `DayOfWeek`, which
 --   maps all dates to one of @`Sunday` .. `Saturday`@.
 --
+--  __NOTE__: Every `Calendar` should implement one of either `CyclicCalendar`
+--            or `LinearCalendar`.
+--
 -- -prop> let date = fromFixed rd' in rd' `elem` fixedsFrom date
 type Calendar :: Type -> Constraint
 class Calendar date where
@@ -184,6 +188,14 @@ class Calendar date where
   fixedsFrom = pure . fixedFrom
 
   fromMoment :: Moment -> date
+
+-- | A `Calendar` whose date space wraps around in a cycle, so a given @date@
+--   maps to infinitely many `FixedDate`s.
+type CyclicCalendar :: Type -> Constraint
+class (Calendar date) => CyclicCalendar date where
+  -- | The latest `FixedDate` on or before the given one whose `fromFixed`
+  --   projection equals @date@.
+  onOrBefore :: date -> FixedDate -> FixedDate
 
 -- |
 --
@@ -425,28 +437,29 @@ type StandardDay = Fin (Nat.FromGHC 32)
 type StandardYear :: Type
 type StandardYear = Integer
 
-kdayOnOrBefore :: DayOfWeek -> FixedDate -> FixedDate
-kdayOnOrBefore k (RD date) =
-  RD $
-    date
-      - widen
-        (fromEnum @DayOfWeek . fromFixed . RD $ date - widen (fromEnum k))
+instance CyclicCalendar DayOfWeek where
+  -- Fixed date of the @k@-day on or before fixed @date@.
+  onOrBefore k (RD date) =
+    RD $
+      date
+        - widen
+          (fromEnum @DayOfWeek . fromFixed . RD $ date - widen (fromEnum k))
 
 kdayOnOrAfter :: DayOfWeek -> FixedDate -> FixedDate
-kdayOnOrAfter k = kdayOnOrBefore k . (+ 6)
+kdayOnOrAfter k = onOrBefore k . (+ 6)
 
 kdayNearest :: DayOfWeek -> FixedDate -> FixedDate
-kdayNearest k = kdayOnOrBefore k . (+ 3)
+kdayNearest k = onOrBefore k . (+ 3)
 
 -- | Fixed date of the @k@-day before fixed @date@. @k@=0 means Sunday, @k@=1
 --   means Monday, and so on.
 kdayBefore :: DayOfWeek -> FixedDate -> FixedDate
-kdayBefore k date = kdayOnOrBefore k $ date - 1
+kdayBefore k date = onOrBefore k $ date - 1
 
 -- | Fixed date of the @k@-day after fixed @date@. @k@=0 means Sunday, @k@=1
 --   means Monday, and so on.
 kdayAfter :: DayOfWeek -> FixedDate -> FixedDate
-kdayAfter k = kdayOnOrBefore k . (+ 7)
+kdayAfter k = onOrBefore k . (+ 7)
 
 -- instance Calendar FrenchRevolutionary where
 --   epoch _ = RD 654415

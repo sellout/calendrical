@@ -14,7 +14,6 @@ module Data.Calendar.Mayan.Tzolkin
     Number,
     name,
     number,
-    onOrBefore,
     ordinal,
     roundOnOrBefore,
     yearBearerFromFixed,
@@ -39,6 +38,7 @@ import "numeric-tangle" Numeric.Chop (floor)
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
   ( Calendar,
+    CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -46,6 +46,7 @@ import "this" Data.Calendar
     fromFixed,
     fromMoment,
     offset,
+    onOrBefore,
   )
 import "this" Data.Calendar.Mayan qualified as Mayan
 import "this" Data.Calendar.Mayan.Haab qualified as Haab
@@ -195,11 +196,11 @@ instance Calendar Date where
 -- | Mayan tzolkin date of fixed @date@.
 --
 --  (11.11)
-onOrBefore :: Date -> FixedDate -> FixedDate
-onOrBefore tzolkin (RD date) =
-  RD $
-    (widen (ordinal tzolkin) + offset (epoch (Proxy :: Proxy Date)))
-      `modI` (date, date - 260)
+instance CyclicCalendar Date where
+  onOrBefore tzolkin (RD date) =
+    RD $
+      (widen (ordinal tzolkin) + offset (epoch (Proxy :: Proxy Date)))
+        `modI` (date, date - 260)
 
 -- | Year bearer of year containing fixed @date@. Returns `Nothing` for uayeb.
 --
@@ -208,7 +209,7 @@ yearBearerFromFixed :: FixedDate -> Maybe Name
 yearBearerFromFixed date =
   if Haab.month (fromFixed date) == Haab.Uayeb
     then empty
-    else pure . name . fromFixed $ Haab.onOrBefore (Haab.Date Haab.Pop 0) date
+    else pure . name . fromFixed $ Haab.Date Haab.Pop 0 `onOrBefore` date
 
 -- | Fixed date of latest date on or before @date@, that is Mayan haab date
 --   @haab@ and tzolkin date @tzolkin@. Returns `Nothing` for impossible

@@ -15,7 +15,6 @@ module Data.Calendar.Mayan.Haab
     Day,
     day,
     month,
-    onOrBefore,
     ordinal,
     --  FIXME: Don’t eexport
     finMod,
@@ -42,6 +41,7 @@ import "numeric-tangle-fin" Numeric.Ration.Instances.Fin ()
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
   ( Calendar,
+    CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -49,6 +49,7 @@ import "this" Data.Calendar
     fromFixed,
     fromMoment,
     offset,
+    onOrBefore,
   )
 import "this" Data.Calendar.Mayan qualified as Mayan
 import "this" Data.Calendar.Types
@@ -215,8 +216,8 @@ instance Calendar Date where
 --   @haab@.
 --
 --  (11.7)
-onOrBefore :: Date -> FixedDate -> FixedDate
-onOrBefore haab (RD date) =
-  RD $
-    widen (ordinal haab)
-      + offset (epoch (Proxy :: Proxy Date)) `modI` (date, date - 365)
+instance CyclicCalendar Date where
+  onOrBefore haab (RD date) =
+    RD $
+      widen (ordinal haab)
+        + offset (epoch (Proxy :: Proxy Date)) `modI` (date, date - 365)

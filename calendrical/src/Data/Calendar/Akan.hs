@@ -8,7 +8,6 @@ module Data.Calendar.Akan
   ( Name (Name),
     Prefix (Fo, Kuru, Kwa, Mono, Nkyi, Nwona),
     Stem (Bene, Dwo, Fie, Kwasi, Memene, Wukuo, Yaw),
-    dayNameOnOrBefore,
     nameDifference,
     prefix,
     stem,
@@ -28,6 +27,7 @@ import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( Calendar,
+    CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -37,6 +37,7 @@ import "this" Data.Calendar
     mod1,
     modI,
     offset,
+    onOrBefore,
   )
 import "this" Data.Calendar.Types (ModularEnum, modularToEnum)
 import "base" Prelude
@@ -132,7 +133,7 @@ instance Calendar Name where
   fromFixed (RD date) = dayName (date - offset (epoch (Proxy :: Proxy Name)))
   fromMoment (Moment t) = fromFixed . RD $ floor t
   fixedsFrom name =
-    let origin = dayNameOnOrBefore name . epoch $ Identity name
+    let origin = onOrBefore name . epoch $ Identity name
      in origin
           :| ( ( \cycle ->
                    let days = 42 * cycle in [origin - days, origin + days]
@@ -140,6 +141,7 @@ instance Calendar Name where
                  =<< [1 ..]
              )
 
-dayNameOnOrBefore :: Name -> FixedDate -> FixedDate
-dayNameOnOrBefore name (RD date) =
-  RD $ nameDifference (fromFixed $ RD 0) name `modI` (date, date - 42)
+instance CyclicCalendar Name where
+  -- Fixed date of latest date on or before fixed @date@ that has Akan @name@.
+  onOrBefore name (RD date) =
+    RD $ nameDifference (fromFixed $ RD 0) name `modI` (date, date - 42)
