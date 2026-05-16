@@ -54,7 +54,7 @@
       calendrical = "calendrical";
     };
     ## Used by Nix builds, but not by GitHub.
-    extraDependencyVersions = ["doctest-0.24.0"];
+    checkBounds.extraDependencyVersions = ["doctest-0.24.0"];
     latestGhcVersion = "9.10.1";
   };
 
