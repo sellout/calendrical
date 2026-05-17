@@ -26,6 +26,8 @@ extra-doc-files:
   docs/*.md
 tested-with:
   GHC == {
+    9.2.1,
+    9.4.1, 9.4.8,
     9.6.1, 9.6.7,
     9.8.1, 9.8.4,
     9.10.1, 9.10.2, 9.10.3,
@@ -61,7 +63,7 @@ custom-setup
     --       9.8.3 include an older Cabal, so a newer one may need to be
     --       manually installed.
     Cabal >= 3.10.3 && < 99,
-    base ^>= {4.18.0, 4.19.0, 4.20.0, 4.21.0, 4.22.0},
+    base ^>= {4.16.0, 4.17.0, 4.18.0, 4.19.0, 4.20.0, 4.21.0, 4.22.0},
     cabal-doctest ^>= {1.0.0},
 
 flag noisy-deprecations
@@ -106,7 +108,7 @@ common GHC2024
 common defaults
   import: GHC2024
   build-depends:
-    base ^>= {4.18.0, 4.19.0, 4.20.0, 4.21.0, 4.22.0},
+    base ^>= {4.16.0, 4.17.0, 4.18.0, 4.19.0, 4.20.0, 4.21.0, 4.22.0},
     ghc-compat-plugin ^>= {0.1.0},
   ghc-options:
     -Weverything
@@ -118,7 +120,7 @@ common defaults
     -- https://gitlab.haskell.org/ghc/ghc/-/issues/16689
     -Wno-unsafe
     -fplugin GhcCompat
-    -fplugin-opt GhcCompat:minVersion=9.6.1
+    -fplugin-opt GhcCompat:minVersion=9.2.1
     -fplugin-opt GhcCompat:reportIncompatibleExtensions=error
   if impl(ghc >= 9.8.1)
     ghc-options:
@@ -151,20 +153,22 @@ common defaults
       -DSELLOUT_NOISY_DEPRECATIONS
   if flag(lint)
     build-depends:
-      -- TODO: Re-enable and address complaints
-      -- henforcer ^>= {1.0.0},
       no-recursion ^>= {0.2.0, 0.3.0, 0.4.0},
     ghc-options:
-      -- TODO: Re-enable and address complaints
-      -- -fplugin Henforcer
       -fplugin NoRecursion
+    -- TODO: Re-enable and address complaits
+    -- if impl(ghc >= 9.4.5)
+    --   build-depends:
+    --     henforcer ^>= {1.0.0},
+    --   ghc-options:
+    --     -fplugin Henforcer
 
 library
   import: defaults
   hs-source-dirs:
     src
   build-depends:
-    fin ^>= {0.3},
+    fin ^>= {0.2.1, 0.3},
     mixed-radix ^>= {0.0.1},
     numeric-tangle ^>= {0.0.1},
     numeric-tangle-fin ^>= {0.0.1},
@@ -204,7 +208,7 @@ test-suite doctests
   build-depends:
     QuickCheck ^>= {2.14.2, 2.15.0, 2.18.0},
     calendrical,
-    doctest ^>= {0.21.1, 0.22.2, 0.23.0, 0.24.0, 0.25.0},
+    doctest ^>= {0.18.2, 0.21.1, 0.22.2, 0.23.0, 0.24.0, 0.25.0},
   -- NB: Adjust this to contain any components that may have doctests (including
   --     executables).
   x-doctest-components:

@@ -105,6 +105,7 @@ in
       testedGhcVersions = system:
         [
           self.lib.defaultGhcVersion
+          "9.4.8"
           "9.6.7"
           "9.8.4"
           "9.10.2"
@@ -116,6 +117,8 @@ in
       ## The versions that are older than those supported by Nix that we
       ## prefer to test against.
       nonNixTestedGhcVersions = [
+        "9.2.1"
+        "9.4.1"
         "9.6.1"
         ## since `cabal-plan-bounds` doesn’t work under Nix
         "9.8.1"
