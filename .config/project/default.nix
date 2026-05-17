@@ -9,20 +9,59 @@
   project = {
     name = "calendrical";
     summary = "Comprehensive date & time library";
-    ## TODO: Move something like this to Flaky.
     file = let
-      copyLicenses = dir: {
+      ## Cabal requires many files to exist at the package level, rather than
+      ## the repo level. This makes copies of the individual files into the
+      ## package directory.
+      ##
+      ## TODO: Move something like this to Flaky.
+      perPackageFiles = dir: {
         "${dir}/LICENSE".source = ../../LICENSE;
         "${dir}/LICENSE.AGPL-3.0-only".source = ../../LICENSE.AGPL-3.0-only;
         "${dir}/LICENSE.Universal-FOSS-exception-1.0".source =
           ../../LICENSE.Universal-FOSS-exception-1.0;
-        "${dir}/LICENSE.commercial".source = ../../LICENSE.commercial;
+        "${dir}/LICENSE.proprietary".source = ../../LICENSE.proprietary;
+        ## We might want to put this somewhere else (like .config/henforcer/),
+        ## but that isn’t currently an option, because of flipstone/henforcer#7.
+        "${dir}/henforcer.toml".text =
+          lib.pm.generators.toTOML {} {
+            globalSection = {};
+            sections = {
+              forAnyModule = {
+                ## doesn’t yet support nested attr sets
+                # allowedAliasUniqueness.allAliasesUniqueExcept = [];
+                maximumExportsPlusHeaderUndocumented = 0;
+                maximumExportsWithoutSince = 0;
+                moduleHeaderCopyrightMustExistNonEmpty = true;
+                ## We want to require a description, but just a “normal”
+                ## description, not the header field.
+                moduleHeaderDescriptionMustExistNonEmpty = false;
+                moduleHeaderLicenseMustExistNonEmpty = true;
+              };
+            };
+          }
+          ## NB: `toTOML` is really just an INI generator, so it can’t handle a
+          ##     lot of syntax. This tacks some bits onto the end that the INI
+          ##     generator does’t like.
+          + ''
+            # Exclude auto-generated `Paths` module
+            [[forPatternModules]]
+            pattern = "Paths_*"
+            [forPatternModules.rulesToIgnore]
+            all = true
+
+            # Exclude auto-generated `Build_doctests` module
+            [[forSpecifiedModules]]
+            module = "Build_doctests"
+            [forSpecifiedModules.rulesToIgnore]
+            all = true
+          '';
       };
     in
-      copyLicenses "calendrical"
-      // copyLicenses "mixed-radix"
-      // copyLicenses "numeric-tangle"
-      // copyLicenses "numeric-tangle-fin";
+      perPackageFiles "calendrical"
+      // perPackageFiles "mixed-radix"
+      // perPackageFiles "numeric-tangle"
+      // perPackageFiles "numeric-tangle-fin";
   };
 
   imports = [./hlint.nix];
@@ -38,12 +77,36 @@
         "check-licenses"
       ]
       ++ lib.concatMap (sys:
-        lib.concatMap (ghc: [
-          "build (${ghc}, ${sys})"
-          "build (--prefer-oldest, ${ghc}, ${sys})"
-        ])
+        lib.concatMap (ghc:
+          ## Don’t add `exclude`d matrix entries to the required list
+          ##
+          ## TODO: Make this less manual (like the `include` component).
+            if
+              ## GHC before 8.4 needs an older Ubuntu
+              lib.versionOlder ghc "8.4"
+              && sys == "ubuntu-24.04"
+              ## GHC doesn’t support ARM before GHC 9.2.
+              || lib.versionOlder ghc "9.2"
+              && builtins.elem sys ["macos-15" "ubuntu-24.04-arm"]
+              ## GHC 9.2.1 relied on libnuma at runtime for aarch64
+              || ghc == "9.2.1" && sys == "ubuntu-24.04-arm"
+              || lib.versionOlder ghc "9.6" && sys == "macos-15"
+              || ghc == "9.4.1" && sys == "windows-2025"
+            then []
+            else [
+              "build (${ghc}, ${sys})"
+              "build (--prefer-oldest, ${ghc}, ${sys})"
+            ])
         self.lib.nonNixTestedGhcVersions)
-      config.services.haskell-ci.systems);
+      config.services.haskell-ci.systems
+      ## Add `include`d matrix entries to the required list.
+      ++ map (
+        entry:
+          if entry.bounds == ""
+          then "build (${entry.ghc}, ${entry.os})"
+          else "build (${entry.bounds}, ${entry.ghc}, ${entry.os})"
+      )
+      config.services.haskell-ci.include);
   services.haskell-ci = {
     inherit (self.lib) defaultGhcVersion;
     ghcVersions = self.lib.nonNixTestedGhcVersions;
@@ -54,7 +117,22 @@
       calendrical = "calendrical";
     };
     ## Used by Nix builds, but not by GitHub.
-    extraDependencyVersions = ["doctest-0.24.0"];
+    checkBounds.extraDependencyVersions = [
+      "QuickCheck-2.15.0"
+      "doctest-0.24.0"
+    ];
+    exclude =
+      [
+        {
+          ghc = "9.4.1";
+          os = "windows-2025";
+        }
+      ]
+      ++ (map (ghc: {
+        inherit ghc;
+        os = "macos-15";
+      }) ["9.2.1" "9.4.1"]);
+    ## The latest Stackage LTS that we also build on GitHub for.
     latestGhcVersion = "9.10.1";
   };
 

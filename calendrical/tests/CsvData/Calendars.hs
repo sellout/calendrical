@@ -20,7 +20,6 @@ import CsvData.Common
     parseBoolean,
     parseDayOfWeek,
     parseFin,
-    parseInt,
     parseInteger,
     parseNatural,
     roundTrip,

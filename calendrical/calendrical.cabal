@@ -5,18 +5,19 @@ cabal-version: 3.0
 name: calendrical
 version: 0.0.1.0
 synopsis: Comprehensive date & time library
-description: An implementation of many calendaring and time systems, based on the book “Calendrical Calculations”.
+description:
+  An implementation of many calendaring and time systems, based on the book
+  [/Calendrical
+  Calculations/](https://www.cs.tau.ac.il/~nachum/calendar-book/index.shtml).
 maintainer: Greg Pfeil <greg@technomadic.org>
 author: Greg Pfeil <greg@technomadic.org>
 copyright: 2024 Greg Pfeil
--- TODO: Remove the redundant `OR AGPL-3.0-only` once
---       haskell/hackage-server#1440 is fixed.
-license: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR AGPL-3.0-only OR LicenseRef-commercial
+license: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-proprietary
 license-files:
   LICENSE
   LICENSE.AGPL-3.0-only
   LICENSE.Universal-FOSS-exception-1.0
-  LICENSE.commercial
+  LICENSE.proprietary
 category:
 build-type: Custom
 extra-doc-files:
@@ -27,29 +28,29 @@ data-files:
   tests/data/*.csv
 tested-with:
   GHC == {
-    9.6.1, 9.6.3,
+    9.2.1,
+    9.4.1, 9.4.8,
+    9.6.1, 9.6.7,
     9.8.1, 9.8.4,
-    9.10.1,
-    9.12.1
+    9.10.1, 9.10.2, 9.10.3,
+    9.12.1, 9.12.2,
+    9.14.1
   }
 
 homepage: https://github.com/sellout/calendrical#readme
 bug-reports: https://github.com/sellout/calendrical/issues
+
 source-repository head
   type: git
   location: https://github.com/sellout/calendrical.git
   subdir: calendrical
 
-flag noisy-deprecations
-  description:
-    Prior to GHC 9.10, the @DEPRECATED@ pragma can’t distinguish between terms
-    and types. Consenquently, you can get spurious warnings when there’s a name
-    collision and the name in the other namespace is deprecated. Or you can
-    choose to not get those warnings, at the risk of not being warned when
-    there’s a name collision and the namespace you’re referencing is the one
-    that’s deprecated.
-  default: True
-  manual: False
+source-repository this
+  type: git
+  location: https://github.com/sellout/calendrical.git
+  subdir: calendrical
+  -- NB: This is the repo version, which is distinct from the package version.
+  tag: v0.1.0
 
 custom-setup
   setup-depends:
@@ -64,8 +65,28 @@ custom-setup
     --       9.8.3 include an older Cabal, so a newer one may need to be
     --       manually installed.
     Cabal >= 3.10.3 && < 99,
-    base ^>= {4.18.0, 4.19.0, 4.20.0, 4.21.0},
+    base ^>= {4.16.0, 4.17.0, 4.18.0, 4.19.0, 4.20.0, 4.21.0, 4.22.0},
     cabal-doctest ^>= {1.0.0},
+
+flag noisy-deprecations
+  description:
+    Prior to GHC 9.10, the @DEPRECATED@ pragma can’t distinguish between terms
+    and types. Consenquently, you can get spurious warnings when there’s a name
+    collision and the name in the other namespace is deprecated. Or you can
+    choose to not get those warnings, at the risk of not being warned when
+    there’s a name collision and the namespace you’re referencing is the one
+    that’s deprecated.
+  default: True
+  -- Because disabling this flag won’t help the solver.
+  manual: True
+
+flag lint
+  description:
+    Build with linting plugins enabled. This is intended for developers of this
+    package.
+  default: False
+  -- Because disabling this flag won’t help the solver.
+  manual: True
 
 -- This mimics the GHC2024 extension
 -- (https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/control.html?highlight=doandifthenelse#extension-GHC2024),
@@ -89,19 +110,20 @@ common GHC2024
 common defaults
   import: GHC2024
   build-depends:
-    base ^>= {4.18.0, 4.19.0, 4.20.0, 4.21.0},
-    no-recursion ^>= {0.2.0, 0.3.0},
+    base ^>= {4.16.0, 4.17.0, 4.18.0, 4.19.0, 4.20.0, 4.21.0, 4.22.0},
+    ghc-compat-plugin ^>= {0.1.0},
   ghc-options:
     -Weverything
     -- This one just reports unfixable things, AFAICT.
     -Wno-all-missed-specialisations
     -- Type inference good.
     -Wno-missing-local-signatures
-    -Wno-prepositive-qualified-module
     -- Warns even when `Unsafe` is explicit, not inferred. See
     -- https://gitlab.haskell.org/ghc/ghc/-/issues/16689
     -Wno-unsafe
-    -fplugin=NoRecursion
+    -fplugin GhcCompat
+    -fplugin-opt GhcCompat:minVersion=9.2.1
+    -fplugin-opt GhcCompat:reportIncompatibleExtensions=error
   if impl(ghc >= 9.8.1)
     ghc-options:
       -- Inference good.
@@ -113,6 +135,7 @@ common defaults
     FunctionalDependencies
     LexicalNegation
     LiberalTypeSynonyms
+    NegativeLiterals
     PackageImports
     ParallelListComp
     QualifiedDo
@@ -128,14 +151,26 @@ common defaults
     NoStarIsType
     NoTypeApplications
   if flag(noisy-deprecations)
-    cpp-options: -DSELLOUT_NOISY_DEPRECATIONS
+    cpp-options:
+      -DSELLOUT_NOISY_DEPRECATIONS
+  if flag(lint)
+    build-depends:
+      no-recursion ^>= {0.2.0, 0.3.0, 0.4.0},
+    ghc-options:
+      -fplugin NoRecursion
+    -- TODO: Re-enable and address complaits
+    -- if impl(ghc >= 9.4.5)
+    --   build-depends:
+    --     henforcer ^>= {1.0.0},
+    --   ghc-options:
+    --     -fplugin Henforcer
 
 library
   import: defaults
   hs-source-dirs:
     src
   build-depends:
-    fin ^>= {0.3},
+    fin ^>= {0.2.1, 0.3},
     mixed-radix ^>= {0.0.1},
     numeric-tangle ^>= {0.0.1},
     numeric-tangle-fin ^>= {0.0.1},
@@ -173,9 +208,13 @@ test-suite doctests
     tests
   main-is: doctests.hs
   build-depends:
-    QuickCheck ^>= {2.14.2, 2.15.0},
+    QuickCheck ^>= {2.14.2, 2.15.0, 2.18.0},
     calendrical,
-    doctest ^>= {0.21.1, 0.22.2, 0.23.0, 0.24.0},
+    doctest ^>= {0.18.2, 0.21.1, 0.22.2, 0.23.0, 0.24.0, 0.25.0},
+  -- NB: Adjust this to contain any components that may have doctests (including
+  --     executables).
+  x-doctest-components:
+    lib
   -- TODO: The sections below here are necessary because we don’t have control
   --       over the generated `Build_doctests.hs` file. So we have to silence
   --       all of its warnings one way or another.
@@ -217,7 +256,8 @@ test-suite csv-data
     vector,
   ghc-options:
     -O2
-    --num-threads $(nproc)
+    -Wno-prepositive-qualified-module
+    -threaded
   other-modules:
     CsvData.Calendars
     CsvData.Common

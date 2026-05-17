@@ -428,7 +428,7 @@ instance
       nextPrec = 11
 
 instance
-  (Show (MixedIntegral '[] 'False), Show (MixedRadix '[] 'True f fi)) =>
+  (Show (MixedRadix '[] 'True f fi)) =>
   Show (MixedRadix '[] 'False f fi)
   where
   showsPrec p (Integral i f) =
@@ -441,7 +441,7 @@ instance
       nextPrec = 11
 
 instance
-  (Show (MixedIntegral (i ': is) b), Show (MixedRadix '[] 'True f fi)) =>
+  (Show (MixedRadix '[] 'True f fi)) =>
   Show (MixedRadix (i ': is) b f fi)
   where
   showsPrec p (Integral i f) =
