@@ -29,10 +29,14 @@
 
     {
       ignore.name = [
-        ## This occurs when we conditionalize the same module import for
-        ## different GHC versions. Ormolu handles actually unifying duplicate
-        ## imports, so this isn’t necessary.
+        ## This can be removed once we no longer support ≤ base 4.18, which
+        ## doesn’t yet export `Data.Functor.unzip`.
+        "Avoid NonEmpty.unzip"
+        ## This complains when we use a common import and then import from the
+        ## same module under a CPP conditional. Since Ormolu handles combinig
+        ## imports when possible anyway, this warning isn’t helpful.
         "Use fewer imports"
+        ## I just don’t like them (even the monadic variant).
         "Use list comprehension"
         "Use otherwise"
       ];

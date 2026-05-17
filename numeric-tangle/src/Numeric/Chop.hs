@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 -- for a @`Bounded` (`Chopped` a)@ constraint
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- |
 -- Copyright: 2024 Greg Pfeil
@@ -29,7 +30,7 @@ import "base" Data.Functor.Const (Const (Const), getConst)
 import "base" Data.Functor.Identity (Identity, runIdentity)
 import "base" Data.Kind (Constraint, Type)
 import "base" Data.Monoid (Alt (Alt), Product, Sum, getAlt, getProduct, getSum)
-import "base" Data.Ord (Down, Ordering (EQ, GT, LT), compare, getDown, (<))
+import "base" Data.Ord (Down, Ord, Ordering (EQ, GT, LT), compare, getDown, (<))
 import "base" Data.Ratio (Ratio)
 import "base" Data.Semigroup (Max, Min, getMax, getMin)
 import "base" Data.Tuple (fst, snd)
@@ -181,7 +182,7 @@ instance (Chop (f a)) => Chop (Alt f a) where
 --   round = fmap round
 --   truncate = fmap truncate
 
-instance (Chop (f (g a))) => Chop (Compose f g a) where
+instance (Ord (Compose f g a), Chop (f (g a))) => Chop (Compose f g a) where
   type Chopped (Compose f g a) = Chopped (f (g a))
   ceiling = ceiling . getCompose
   floor = floor . getCompose

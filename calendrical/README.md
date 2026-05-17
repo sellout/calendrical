@@ -1,11 +1,12 @@
 # Calendrical
 
+[![Hackage Version](https://img.shields.io/hackage/v/calendrical)](https://hackage.haskell.org/package/calendrical)
 [![Packaging status](https://repology.org/badge/tiny-repos/haskell:calendrical.svg)](https://repology.org/project/haskell:calendrical/versions)
 [![latest packaged versions](https://repology.org/badge/latest-versions/haskell:calendrical.svg)](https://repology.org/project/haskell:calendrical/versions)
 
 Comprehensive date & time library
 
-An implementation of many calendaring and time systems, based on the book “Calendrical Calculations”.
+An implementation of many calendaring and time systems, based on the book [_Calendrical Calculations_](https://www.cs.tau.ac.il/~nachum/calendar-book/index.shtml).
 
 ## usage
 

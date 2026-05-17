@@ -1,6 +1,10 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE Trustworthy #-}
+#if !MIN_VERSION_base(4, 20, 0)
+{-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
+#endif
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 -- |
@@ -54,11 +58,21 @@ import "base" Prelude
     (/),
     (^),
   )
+#if !MIN_VERSION_base(4, 18, 0)
+import "base" Data.Bits (complement)
+import "base" Data.Bool (Bool (True))
+import "base" Data.Coerce (coerce)
+import "base" Data.Eq (Eq, (==))
+import "base" Data.Function (($))
+import "base" Data.Ord (getDown)
+import "base" Prelude (enumFrom, enumFromThen, fromEnum, pred, succ, toEnum)
+#endif
 #if !MIN_VERSION_base(4, 19, 0)
 import "base" Prelude (Num)
 #endif
 #if !MIN_VERSION_base(4, 20, 0)
 import "base" Data.Functor.Compose (Compose (Compose))
+import "base" Data.Ord (Ord)
 #endif
 
 -- Alt
@@ -102,25 +116,33 @@ instance (Applicative f, Fractional n) => Fractional (Ap f n) where
 -- Compose
 
 #if !MIN_VERSION_base(4, 19, 0)
-deriving newtype instance Bounded (f (g a)) => Bounded (Compose f g a)
+deriving newtype instance (Bounded (f (g a))) => Bounded (Compose f g a)
 
-deriving newtype instance Enum (f (g a)) => Enum (Compose f g a)
+deriving newtype instance (Enum (f (g a))) => Enum (Compose f g a)
 
-deriving newtype instance Integral (f (g a)) => Integral (Compose f g a)
+deriving newtype instance
+  (Ord (Compose f g a), Integral (f (g a))) =>
+  Integral (Compose f g a)
 
-deriving newtype instance Num (f (g a)) => Num (Compose f g a)
+deriving newtype instance (Num (f (g a))) => Num (Compose f g a)
 
-deriving newtype instance Real (f (g a)) => Real (Compose f g a)
+deriving newtype instance
+  (Ord (Compose f g a), Real (f (g a))) =>
+  Real (Compose f g a)
 #endif
 
 #if !MIN_VERSION_base(4, 20, 0)
-deriving newtype instance Floating (f (g a)) => Floating (Compose f g a)
+deriving newtype instance (Floating (f (g a))) => Floating (Compose f g a)
 
-deriving newtype instance Fractional (f (g a)) => Fractional (Compose f g a)
+deriving newtype instance (Fractional (f (g a))) => Fractional (Compose f g a)
 
-deriving newtype instance RealFloat (f (g a)) => RealFloat (Compose f g a)
+deriving newtype instance
+  (Ord (Compose f g a), RealFloat (f (g a))) =>
+  RealFloat (Compose f g a)
 
-deriving newtype instance RealFrac (f (g a)) => RealFrac (Compose f g a)
+deriving newtype instance
+  (Ord (Compose f g a), RealFrac (f (g a))) =>
+  RealFrac (Compose f g a)
 #endif
 
 -- Double
@@ -205,7 +227,7 @@ instance (Enum a, Bounded a, Eq a) => Enum (Down a) where
       | x == minBound
       = [Down x] -- We can't rely on 'enumFromThen _ (pred @a minBound)` behaving nicely,
                  -- since 'enumFromThen _' might be strict and 'pred minBound' might throw
-      | otherwise
+      | True
       = coerce $ enumFromThen x (pred x)
   enumFromThen (Down x) (Down y) = coerce $ enumFromThen x y
 #endif
