@@ -243,17 +243,17 @@ test-suite csv-data
   default-extensions:
     OverloadedStrings
   build-depends:
-    bytestring,
+    bytestring ^>= {0.11.1, 0.12.0},
     calendrical,
-    cassava,
-    containers,
-    fin ^>= {0.3},
-    numeric-tangle,
-    tasty,
-    tasty-expected-failure,
-    tasty-hunit,
-    text,
-    vector,
+    cassava ^>= {0.5.2},
+    containers ^>= {0.6.5, 0.7, 0.8},
+    fin ^>= {0.2.1, 0.3},
+    numeric-tangle ^>= {0.0.1},
+    tasty ^>= {1.1.0, 1.4.2, 1.5.3},
+    tasty-expected-failure ^>= {0.11.1, 0.12.3},
+    tasty-hunit ^>= {0.10},
+    text ^>= {1.2.5, 2.0.1, 2.1},
+    vector ^>= {0.12.3, 0.13.1},
   ghc-options:
     -O2
     -Wno-prepositive-qualified-module
