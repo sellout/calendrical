@@ -271,3 +271,20 @@ test-suite csv-data
     Paths_calendrical
   autogen-modules:
     Paths_calendrical
+
+test-suite properties
+  import: defaults
+  type: exitcode-stdio-1.0
+  hs-source-dirs:
+    tests
+  main-is: properties.hs
+  build-depends:
+    calendrical,
+    hedgehog ^>= {1.1, 1.2, 1.4, 1.5, 1.7},
+    tasty ^>= {1.1.0, 1.4.2, 1.5.3},
+    tasty-hedgehog ^>= {1.1.0, 1.3.0, 1.4.0},
+  ghc-options:
+    -O2
+  other-modules:
+    Properties.Calendars
+    Properties.Class

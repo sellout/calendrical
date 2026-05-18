@@ -14,10 +14,12 @@ import "base" Data.Eq (Eq)
 import "base" Data.Function (($))
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord)
+import "base" Text.Read (Read)
+import "base" Text.Show (Show)
 import "this" Data.Calendar
-  ( LinearCalendar,
-    Calendar,
+  ( Calendar,
     FixedDate (RD),
+    LinearCalendar,
     epoch,
     fixedFrom,
     fromFixed,
@@ -42,7 +44,7 @@ data Month
   | Bahman
   | Asfand
   | GathaDays
-  deriving stock (Bounded, Enum, Eq, Ord)
+  deriving stock (Bounded, Enum, Eq, Ord, Read, Show)
 
 type Date :: Type
 type Date = T30P5.Date Month
