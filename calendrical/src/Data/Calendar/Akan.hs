@@ -5,7 +5,9 @@
 -- Copyright: 2024 Greg Pfeil
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 module Data.Calendar.Akan
-  ( Name,
+  ( Name (Name),
+    Prefix (Fo, Kuru, Kwa, Mono, Nkyi, Nwona),
+    Stem (Bene, Dwo, Fie, Kwasi, Memene, Wukuo, Yaw),
     dayNameOnOrBefore,
     nameDifference,
     prefix,
@@ -15,13 +17,15 @@ where
 
 import "base" Control.Category ((.))
 import "base" Control.Monad ((=<<))
+import "base" Data.Eq (Eq)
 import "base" Data.Function (($))
 import "base" Data.Functor.Identity (Identity (Identity))
 import "base" Data.Kind (Type)
 import "base" Data.List.NonEmpty (NonEmpty ((:|)))
+import "base" Data.Ord (Ord)
 import "base" Data.Proxy (Proxy (Proxy))
-import "base" Data.Semigroup ((<>))
-import "base" Text.Show (show)
+import "base" Text.Read (Read)
+import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( CyclicCalendar,
     FixedDate (RD),
@@ -34,11 +38,11 @@ import "this" Data.Calendar
     modI,
     offset,
   )
+import "this" Data.Calendar.Types (ModularEnum, modularToEnum)
 import "base" Prelude
   ( Bounded,
     Enum,
     Integer,
-    error,
     floor,
     fromEnum,
     fromIntegral,
@@ -56,7 +60,7 @@ data Prefix
   | Kwa
   | Mono
   | Fo
-  deriving stock (Bounded)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Prefix where
   fromEnum = \case
@@ -66,14 +70,15 @@ instance Enum Prefix where
     Kwa -> 4
     Mono -> 5
     Fo -> 6
-  toEnum = \case
+  toEnum i = case modularToEnum (Proxy :: Proxy Prefix) i of
     1 -> Nwona
     2 -> Nkyi
     3 -> Kuru
     4 -> Kwa
     5 -> Mono
-    6 -> Fo
-    n -> error $ "invalid Akan day prefix: " <> show n
+    _ -> Fo
+
+instance ModularEnum Prefix
 
 type Stem :: Type
 data Stem
@@ -84,7 +89,7 @@ data Stem
   | Kwasi
   | Dwo
   | Bene
-  deriving stock (Bounded)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Stem where
   fromEnum = \case
@@ -95,18 +100,20 @@ instance Enum Stem where
     Kwasi -> 5
     Dwo -> 6
     Bene -> 7
-  toEnum = \case
+  toEnum i = case modularToEnum (Proxy :: Proxy Stem) i of
     1 -> Wukuo
     2 -> Yaw
     3 -> Fie
     4 -> Memene
     5 -> Kwasi
     6 -> Dwo
-    7 -> Bene
-    n -> error $ "invalid Akan day stem: " <> show n
+    _ -> Bene
+
+instance ModularEnum Stem
 
 type Name :: Type
 data Name = Name {prefix :: Prefix, stem :: Stem}
+  deriving stock (Eq, Ord, Read, Show)
 
 dayName :: Integer -> Name
 dayName n =

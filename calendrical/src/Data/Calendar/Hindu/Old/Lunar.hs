@@ -99,7 +99,19 @@ instance Enum Month where
     Pausa -> 10
     Magha -> 11
     Phalguna -> 12
-  toEnum = modularToEnum
+  toEnum i = case modularToEnum (Proxy :: Proxy Month) i of
+    1 -> Caitra
+    2 -> Vaisakha
+    3 -> Jyestha
+    4 -> Asadha
+    5 -> Sravana
+    6 -> Bhadrapada
+    7 -> Asvina
+    8 -> Kartika
+    9 -> Margasirsa
+    10 -> Pausa
+    11 -> Magha
+    _ -> Phalguna
 
 instance ModularEnum Month
 

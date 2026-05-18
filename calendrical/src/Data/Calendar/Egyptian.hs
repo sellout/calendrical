@@ -15,6 +15,8 @@ import "base" Data.Eq (Eq)
 import "base" Data.Function (($))
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord)
+import "base" Text.Read (Read)
+import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( Calendar,
     CyclicCalendar,
@@ -43,7 +45,7 @@ data Month
   | Epiphi
   | Mesori
   | Unnamed
-  deriving stock (Bounded, Enum, Eq, Ord)
+  deriving stock (Bounded, Enum, Eq, Ord, Read, Show)
 
 type Date :: Type
 type Date = T30P5.Date Month

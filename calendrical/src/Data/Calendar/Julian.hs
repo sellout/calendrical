@@ -5,15 +5,24 @@
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 module Data.Calendar.Julian
   ( Date (Date),
+    Event (Ides, Kalends, Nones),
     Month (..),
-    RomanDate,
+    RomanDate (RomanDate),
     RomanYear (AUC),
     Year (BCE, CE),
     aucYearFromJulian,
+    count,
+    day,
     easternOrthodoxChristmas,
+    event,
     inGregorian,
+    leap,
+    month,
+    monthR,
+    year,
     yearFromAUC,
     yearFromInteger,
+    yearR,
     yearToInteger,
     yearRomeFounded,
   )
@@ -22,6 +31,7 @@ where
 import "base" Control.Category ((.))
 import "base" Data.Bifunctor (bimap)
 import "base" Data.Bool (Bool (False, True), not, (&&), (||))
+import "base" Data.Either (either)
 import "base" Data.Eq (Eq, (/=), (==))
 import "base" Data.Foldable (elem)
 import "base" Data.Function (($))
@@ -30,8 +40,12 @@ import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
+import "base" Text.Read (Read)
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
+import "numeric-tangle" Numeric.Abs (splitAbs)
+import "numeric-tangle" Numeric.Chop (floor)
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
   ( Calendar,
@@ -52,12 +66,10 @@ import "this" Data.Calendar.Gregorian
   ( Month (December, February, January, July, March, May, November, October, September),
   )
 import "this" Data.Calendar.Gregorian qualified as Gregorian
-import "this" Data.Calendar.Types (Integer, PositiveInteger)
+import "this" Data.Calendar.Types (Integer, PositiveInteger, toModularEnum)
 import "base" Prelude
   ( Bounded,
-    abs,
     div,
-    floor,
     fromEnum,
     fromIntegral, -- __TODO__: Remove, because it‘s only used in lossy cases.
     toEnum,
@@ -74,7 +86,7 @@ type Year :: Type
 data Year
   = BCE PositiveInteger
   | CE PositiveInteger
-  deriving stock (Eq)
+  deriving stock (Eq, Read, Show)
 
 instance Ord Year where
   compare a b = compare (yearToInteger a) $ yearToInteger b
@@ -84,43 +96,44 @@ instance Ord Year where
 --
 --   For example, @`BCE ` 1@ maps to @0@.
 --
---  __TOzDO__: Define this as an `Iso'`.
+--  __TODO__: Define this as an `Iso'`.
 yearToInteger :: Year -> Integer
 yearToInteger = \case
   BCE bce -> -(widen bce) + 1
   CE ce -> widen ce
 
 yearFromInteger :: Integer -> Year
-yearFromInteger y =
-  if y <= 0
-    then BCE . fromIntegral $ abs y + 1
-    else CE $ fromIntegral y
+yearFromInteger =
+  either (BCE . (+ 1)) (\year -> if year == 0 then BCE 1 else CE year)
+    . splitAbs
 
 isLeapYear :: Year -> Bool
 isLeapYear = \case
   CE ce -> ce `mod` 4 == 0
-  BCE bce -> (-bce) `mod` 4 == 3
+  -- NOTE: @(-bce) `mod` 4 == 3@ would underflow `Natural`, but this is
+  --       equivalent.
+  BCE bce -> bce `mod` 4 == 1
 
 type Day :: Type
 type Day = Fin (Nat.FromGHC 32)
 
 type Date :: Type
 data Date = Date {year :: Year, month :: Month, day :: Day}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = RD (-1)
   fromFixed date = Date year month day
     where
       approx = floor $ (4 * offset (date - epoch (Proxy :: Proxy Date)) + 1464) % 1461
-      year = if approx <= 0 then BCE $ approx + 1 else CE approx
+      year = yearFromInteger approx
       priorDays = offset $ date - fixedFrom (Date year January 1)
       correction =
         if
           | date < fixedFrom (Date year March 1) -> 0
           | isLeapYear year -> 1
           | True -> 2
-      month = toEnum . floor $ (12 * (priorDays + correction) + 373) % 367
+      month = toModularEnum . floor $ (12 * (priorDays + correction) + 373) % 367
       day = fromIntegral (offset $ date - fixedFrom (Date year month 1)) + 1
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
@@ -130,8 +143,8 @@ instance Calendar Date where
       offset (epoch (Proxy :: Proxy Date))
         - 1
         + 365 * (y - 1)
-        + (y - 1 `div` 4)
-        + floor ((367 * fromEnum month - 362) % 12)
+        + ((y - 1) `div` 4)
+        + floor ((367 * widen (fromEnum month) - 362) % 12)
         + ( if
               | month <= February -> 0
               | isLeapYear year -> -1
@@ -146,7 +159,7 @@ data Event
   = Kalends
   | Nones
   | Ides
-  deriving stock (Bounded, Eq, Ord)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 idesOfMonth :: Month -> Day
 idesOfMonth month = if month `elem` [March, May, July, October] then 15 else 13
@@ -162,7 +175,7 @@ data RomanDate = RomanDate
     count :: Fin (Nat.FromGHC 20),
     leap :: Bool
   }
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar RomanDate where
   epoch _ = epoch (Proxy :: Proxy Date)
@@ -195,7 +208,7 @@ instance CyclicCalendar RomanDate where
       Date {year, month, day} = fromFixed date
       month' = toEnum $ fromEnum month + 1 `mod1` 12
       year' =
-        if month /= January
+        if month' /= January
           then year
           else case year of
             BCE 1 -> CE 1

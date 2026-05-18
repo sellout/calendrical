@@ -22,6 +22,7 @@ program-options
 constraints:
   -- Versions before this don’t support plugin options.
   no-recursion >= 0.2.0.0,
+  tasty-hunit >= 0.10,
 
 tests: True
 

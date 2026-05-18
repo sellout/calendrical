@@ -120,6 +120,7 @@
     checkBounds.extraDependencyVersions = [
       "QuickCheck-2.15.0"
       "doctest-0.24.0"
+      "tasty-1.5.3"
     ];
     exclude =
       [

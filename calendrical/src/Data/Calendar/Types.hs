@@ -63,6 +63,7 @@ module Data.Calendar.Types
     sinDegrees,
     sum,
     tanDegrees,
+    toModularEnum,
     true,
     (%),
   )
@@ -80,6 +81,7 @@ import "base" Data.Kind (Constraint, Type)
 import "base" Data.Maybe (Maybe (Just, Nothing))
 import "base" Data.Monoid (Sum (Sum), getSum)
 import "base" Data.Ord ((<=))
+import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio (Ratio, Rational)
 import "base" Data.Tuple (fst)
 import "base" Numeric (asin, atan, cos, pi, sin, tan)
@@ -87,10 +89,8 @@ import "base" Numeric.Natural (Natural)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat (Nat)
 import "fin" Data.Type.Nat qualified as Nat
-import "mixed-radix" Numeric.MixedRadix
-  ( MixedIntegral (Unbounded),
-    MixedRadix (FinalFrac, FracRadix, Integral),
-  )
+import "mixed-radix" Numeric.MixedRadix (MixedRadix)
+import "mixed-radix" Numeric.MixedRadix qualified as Mixed
 import "numeric-tangle" Numeric.Chop (ceiling, floor, mixedFraction)
 import "numeric-tangle" Numeric.Ration (rationalize, (%))
 import "numeric-tangle" Numeric.Widen (widen)
@@ -98,6 +98,7 @@ import "base" Prelude
   ( Bounded,
     Enum,
     Integer,
+    Integral,
     Num,
     error,
     fromEnum,
@@ -107,6 +108,8 @@ import "base" Prelude
     minBound,
     signum,
     succ,
+    toEnum,
+    toInteger,
     (*),
     (+),
     (-),
@@ -171,13 +174,21 @@ type Real = Rational -- Double
 type ModularEnum :: Type -> Constraint
 class (Enum a, Bounded a) => ModularEnum a
 
-modularToEnum :: forall a. (ModularEnum a) => Base.Int -> a
-modularToEnum i =
-  let minb = fromEnum @a minBound
-   in foldr
-        (const succ)
-        minBound
-        [1 .. (i - minb) `mod` (fromEnum @a maxBound - minb)]
+-- | This should always return an integer in the range of the `ModularEnum`’s
+--   bounds.
+modularToEnum ::
+  forall i a proxy. (ModularEnum a, Integral i) => proxy a -> i -> Base.Int
+modularToEnum _ i =
+  let minb = toInteger $ fromEnum @a minBound
+   in -- NOTE: This `fromIntegral` is safe, because we know the enumeration fits
+      --       in an `Int`.
+      fromIntegral $
+        (toInteger i - minb) `mod` (toInteger (fromEnum @a maxBound) - minb + 1) + minb
+
+-- | Since modular enumerations wrap around, we can use any `Integral` type to
+--   get there.
+toModularEnum :: forall i a. (ModularEnum a, Integral i) => i -> a
+toModularEnum = toEnum . modularToEnum (Proxy :: Proxy a)
 
 -- | Generalizes `Prelude.mod` to handle non-`Integral` types.
 --
@@ -288,7 +299,8 @@ type Minute :: Type
 type Minute = Fin MinuteBound
 
 degreesMinutesSeconds :: Degree -> Minute -> Real -> AngleT
-degreesMinutesSeconds d m = Integral (Unbounded d) . FracRadix m . FinalFrac
+degreesMinutesSeconds d m =
+  Mixed.Integral (Mixed.Unbounded d) . Mixed.FracRadix m . Mixed.FinalFrac
 
 -- -- |
 -- --

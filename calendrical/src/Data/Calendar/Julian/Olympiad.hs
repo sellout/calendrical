@@ -13,9 +13,12 @@ module Data.Calendar.Julian.Olympiad
   )
 where
 
+import "base" Data.Eq (Eq)
 import "base" Data.Function (($))
 import "base" Data.Kind (Type)
+import "base" Data.Ord (Ord)
 import "base" Numeric.Natural (Natural)
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -24,6 +27,7 @@ import "base" Prelude (divMod, fromIntegral, (*), (+), (-))
 
 type Olympiad :: Type
 data Olympiad = Olympiad {cycle :: Natural, year :: Fin (Nat.FromGHC 5)}
+  deriving stock (Eq, Ord, Show)
 
 start :: Julian.Year
 start = Julian.BCE 776

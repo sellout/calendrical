@@ -21,13 +21,14 @@ import "base" Data.Function (($))
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord, (<=))
 import "base" Data.Proxy (Proxy (Proxy))
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
   ( Calendar,
     CyclicCalendar,
-    DayOfWeek (Monday, Sunday, Thursday),
+    DayOfWeek (Sunday, Thursday),
     FixedDate (RD),
     Moment (Moment),
     epoch,
@@ -44,9 +45,12 @@ import "base" Prelude (div, floor, fromEnum, fromIntegral, toEnum, (+), (-))
 type Week :: Type
 type Week = Fin (Nat.FromGHC 54)
 
+type Day :: Type
+type Day = Fin (Nat.FromGHC 8)
+
 type Date :: Type
-data Date = Date {year :: Year, week :: Week, day :: DayOfWeek}
-  deriving stock (Eq, Ord)
+data Date = Date {year :: Year, week :: Week, day :: Day}
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = epoch (Proxy :: Proxy Gregorian.Date)
@@ -54,12 +58,12 @@ instance CyclicCalendar Date where
     where
       approx = Gregorian.yearFromFixed $ date - 3
       year =
-        if fixedFrom (Date (approx + 1) 1 Monday) <= date
+        if fixedFrom (Date (approx + 1) 1 1) <= date
           then approx + 1
           else approx
       week =
         fromIntegral $
-          offset (date - fixedFrom (Date year 1 Monday)) `div` 7 + 1
+          offset (date - fixedFrom (Date year 1 1)) `div` 7 + 1
       day = toEnum . fromIntegral $ offset (date - RD 0) `mod1` 7
   fromMoment (Moment t) = fromFixed . RD $ floor t
 

@@ -54,6 +54,8 @@ import "base" Data.Ord (Ord, Ordering (EQ, GT, LT), compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
 import "base" Data.Tuple (fst, snd, uncurry)
+import "base" Text.Read (Read)
+import "base" Text.Show (Show)
 import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
@@ -115,7 +117,7 @@ data Month
   | October
   | November
   | December
-  deriving stock (Bounded, Eq, Ord)
+  deriving stock (Bounded, Eq, Ord, Read, Show)
 
 instance Enum Month where
   fromEnum = \case
@@ -131,7 +133,19 @@ instance Enum Month where
     October -> 10
     November -> 11
     December -> 12
-  toEnum = modularToEnum
+  toEnum i = case modularToEnum (Proxy :: Proxy Month) i of
+    1 -> January
+    2 -> February
+    3 -> March
+    4 -> April
+    5 -> May
+    6 -> June
+    7 -> July
+    8 -> August
+    9 -> September
+    10 -> October
+    11 -> November
+    _ -> December
 
 instance ModularEnum Month
 
@@ -141,7 +155,7 @@ type Day = Fin (Nat.FromGHC 32)
 type Date :: Type
 data Date = Date
   {year :: Year, month :: Month, day :: Day}
-  deriving stock (Eq, Ord)
+  deriving stock (Eq, Ord, Show)
 
 instance CyclicCalendar Date where
   epoch _ = RD 1
@@ -178,6 +192,7 @@ instance Calendar Date where
 type Year :: Type
 newtype Year = Year {yearToInteger :: Integer}
   deriving newtype (Eq, Ord, Num)
+  deriving stock (Read, Show)
 
 isLeapYear :: Year -> Bool
 isLeapYear (Year gYear) =
@@ -227,6 +242,9 @@ lastDayOfMonth gYear gMonth =
 independenceDay :: Year -> FixedDate
 independenceDay gYear = fixedFrom $ Date gYear July 4
 
+-- | If @n@>0, return the @n@-th @k@-day on or after @gDate@. If @n@<0, return
+--   the @n@-th @k@-day on or before @gDate@. If @n@=0 return bogus. A @k@-day
+--   of 0 means Sunday, 1 means Monday, and so on.
 nthKday :: Integer -> DayOfWeek -> Date -> FixedDate
 nthKday n k gDate = RD $ case compare n 0 of
   GT -> 7 * n + offset (kdayBefore k fixedDate)

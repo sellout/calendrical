@@ -100,7 +100,18 @@ instance Enum Samvatsara where
     Yuvan -> 9
     Dhatr -> 10
     Isvara -> 11
-  toEnum = modularToEnum
+  toEnum i = case modularToEnum (Proxy :: Proxy Samvatsara) i of
+    1 -> Prabhava
+    2 -> Vibhava
+    3 -> Sukla
+    4 -> Pramoda
+    5 -> Prajapati
+    6 -> Angiras
+    7 -> Srimukha
+    8 -> Bhava
+    9 -> Yuvan
+    10 -> Dhatr
+    _ -> Isvara
 
 instance ModularEnum Samvatsara
 
@@ -141,7 +152,19 @@ instance Enum Month where
     Sahasya -> 10
     Tapas -> 11
     Tapasya -> 12
-  toEnum = modularToEnum
+  toEnum i = case modularToEnum (Proxy :: Proxy Month) i of
+    1 -> Madhu
+    2 -> Madhava
+    3 -> Sukra
+    4 -> Suchi
+    5 -> Nabhas
+    6 -> Nabhasya
+    7 -> Issa
+    8 -> Urja
+    9 -> Sahas
+    10 -> Sahasya
+    11 -> Tapas
+    _ -> Tapasya
 
 instance ModularEnum Month
 
