@@ -231,8 +231,9 @@ amod x y = y + x `mod` (-y)
 -- instance Mod Natural where
 --   mod = Prelude.mod
 
+-- | The value of @x@ shifted into the range [@a@..@b@). Returns @x@ if @a=b@.
 modI :: (Eq a, Mod a) => a -> (a, a) -> a
-modI x (a, b) = if a == b then x else a + (x - a `mod` b - a)
+modI x (a, b) = if a == b then x else a + (x - a) `mod` (b - a)
 
 mod1 :: (Eq a, Mod a) => a -> a -> a
 mod1 x b = let r = x `mod` b in if r == 0 then b else r
