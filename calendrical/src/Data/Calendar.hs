@@ -51,7 +51,7 @@ module Data.Calendar
     -- * mod
     Mod (..),
     modI,
-    mod1,
+    amod,
   )
 where
 
@@ -90,10 +90,10 @@ import "this" Data.Calendar.Types
     NonegativeReal,
     PositiveReal,
     Real,
+    amod,
     binarySearch,
     deg,
     mod,
-    mod1,
     modI,
     modularToEnum,
   )

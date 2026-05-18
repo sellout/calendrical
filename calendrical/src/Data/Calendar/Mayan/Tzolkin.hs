@@ -54,8 +54,8 @@ import "this" Data.Calendar.Types
   ( Integer,
     ModularEnum,
     NonnegativeInteger,
+    amod,
     mod,
-    mod1,
     modI,
     modularToEnum,
     toModularEnum,
@@ -176,7 +176,7 @@ instance Calendar Date where
   fromFixed date =
     let
      in Date
-          { number = fromIntegral (count `mod1` 13),
+          { number = fromIntegral (count `amod` 13),
             name = toModularEnum count
           }
     where

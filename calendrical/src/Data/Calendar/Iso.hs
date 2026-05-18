@@ -26,16 +26,16 @@ import "fin" Data.Fin (Fin)
 import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
-  ( LinearCalendar,
-    Calendar,
+  ( Calendar,
     DayOfWeek (Sunday, Thursday),
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
+    amod,
     epoch,
     fixedFrom,
     fromFixed,
     fromMoment,
-    mod1,
     offset,
   )
 import "this" Data.Calendar.Gregorian (Year)
@@ -64,7 +64,7 @@ instance Calendar Date where
       week =
         fromIntegral $
           offset (date - fixedFrom (Date year 1 1)) `div` 7 + 1
-      day = toEnum . fromIntegral $ offset (date - RD 0) `mod1` 7
+      day = toEnum . fromIntegral $ offset (date - RD 0) `amod` 7
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
 instance LinearCalendar Date where

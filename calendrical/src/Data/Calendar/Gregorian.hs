@@ -61,12 +61,13 @@ import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
-  ( LinearCalendar,
-    Calendar,
+  ( Calendar,
     DayOfWeek (Friday, Monday, Sunday, Tuesday),
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     Range,
+    amod,
     epoch,
     fixedFrom,
     fromFixed,
@@ -76,7 +77,6 @@ import "this" Data.Calendar
     kdayNearest,
     kdayOnOrAfter,
     mod,
-    mod1,
     offset,
   )
 import "this" Data.Calendar.Types
@@ -236,7 +236,7 @@ lastDayOfMonth gYear gMonth =
   fromIntegral . dateDifference (Date gYear gMonth 1) $
     Date
       (if gMonth == December then gYear + 1 else gYear)
-      (toEnum $ fromEnum gMonth + 1 `mod1` 12)
+      (toEnum $ fromEnum gMonth + 1 `amod` 12)
       1
 
 independenceDay :: Year -> FixedDate

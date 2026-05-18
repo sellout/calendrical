@@ -30,11 +30,11 @@ import "this" Data.Calendar
     CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
+    amod,
     epoch,
     fixedsFrom,
     fromFixed,
     fromMoment,
-    mod1,
     modI,
     offset,
     onOrBefore,
@@ -118,12 +118,12 @@ data Name = Name {prefix :: Prefix, stem :: Stem}
 
 dayName :: Integer -> Name
 dayName n =
-  Name (toEnum . fromIntegral $ n `mod1` 6) . toEnum . fromIntegral $
-    n `mod1` 7
+  Name (toEnum . fromIntegral $ n `amod` 6) . toEnum . fromIntegral $
+    n `amod` 7
 
 nameDifference :: Name -> Name -> Integer
 nameDifference day1 day2 =
-  prefixDifference + 36 * (stemDifference - prefixDifference) `mod1` 42
+  prefixDifference + 36 * (stemDifference - prefixDifference) `amod` 42
   where
     prefixDifference = fromIntegral $ fromEnum (prefix day2) - fromEnum (prefix day1)
     stemDifference = fromIntegral $ fromEnum (stem day2) - fromEnum (stem day1)

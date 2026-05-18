@@ -48,7 +48,6 @@ module Data.Calendar.Types
     mins,
     mn,
     mod,
-    mod1,
     modI,
     modularToEnum,
     next,
@@ -225,7 +224,12 @@ quotient :: Real -> NonzeroReal -> Integer
 quotient m = fst . mixedFraction . (m %)
 
 -- | The value of (@x@ mod @y@) with @y@ instead of 0.
-amod :: Integer -> NonzeroInteger -> Integer
+--
+--  __NOTE__: The type has been changed from the Common Lisp implementation.
+--            It’s generalized to anything that implements `Mod` and doesn’t
+--            specify “Nonnegative” for the second argument (but that was never
+--            enforced at the type level anyway).
+amod :: (Mod a) => a -> a -> a
 amod x y = y + x `mod` (-y)
 
 -- instance Mod Natural where
@@ -234,9 +238,6 @@ amod x y = y + x `mod` (-y)
 -- | The value of @x@ shifted into the range [@a@..@b@). Returns @x@ if @a=b@.
 modI :: (Eq a, Mod a) => a -> (a, a) -> a
 modI x (a, b) = if a == b then x else a + (x - a) `mod` (b - a)
-
-mod1 :: (Eq a, Mod a) => a -> a -> a
-mod1 x b = let r = x `mod` b in if r == 0 then b else r
 
 -- | [0..360)
 type Angle :: Type

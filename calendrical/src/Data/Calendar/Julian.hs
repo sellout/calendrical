@@ -48,17 +48,17 @@ import "numeric-tangle" Numeric.Abs (splitAbs)
 import "numeric-tangle" Numeric.Chop (floor)
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
-  ( LinearCalendar,
-    Calendar,
+  ( Calendar,
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
+    amod,
     epoch,
     fixedFrom,
     fromFixed,
     fromMoment,
     listRange,
     mod,
-    mod1,
     momentFrom,
     offset,
   )
@@ -206,7 +206,7 @@ instance Calendar RomanDate where
     | True = RomanDate year March Kalends (fromIntegral $ 31 - day) $ day == 25
     where
       Date {year, month, day} = fromFixed date
-      month' = toEnum $ fromEnum month + 1 `mod1` 12
+      month' = toEnum $ fromEnum month + 1 `amod` 12
       year' =
         if month' /= January
           then year
