@@ -168,18 +168,19 @@ instance LinearCalendar Date where
       rationalize (offset $ epoch (Proxy :: Proxy Date))
         + newYear
         + aryaMonth
-          * ( widen . rationalize . fromEnum $
+          * ( widen . rationalize $
                 if not leap
                   && fromIntegral
                     ( ceiling $
                         (newYear - mina) % (Solar.aryaMonth - aryaMonth)
                     )
-                    <= fromEnum month
-                  then month
-                  else pred month
+                    <= monthIx
+                  then monthIx
+                  else pred monthIx
             )
         + rationalize (widen @_ @Integer day - 1) * aryaDay
         + hr (-6)
     where
+      monthIx = fromEnum month
       mina = (12 * rationalize year - 1) * Solar.aryaMonth
       newYear = aryaMonth * rationalize (quotient mina aryaMonth + 1)
