@@ -62,11 +62,12 @@ import "numeric-tangle" Numeric.Widen (widen)
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     DayOfWeek (Friday, Monday, Sunday, Tuesday),
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     Range,
+    amod,
     epoch,
     fixedFrom,
     fromFixed,
@@ -76,7 +77,6 @@ import "this" Data.Calendar
     kdayNearest,
     kdayOnOrAfter,
     mod,
-    mod1,
     offset,
   )
 import "this" Data.Calendar.Types
@@ -157,7 +157,7 @@ data Date = Date
   {year :: Year, month :: Month, day :: Day}
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = RD 1
   fromFixed date = Date {year, month, day}
     where
@@ -172,7 +172,7 @@ instance CyclicCalendar Date where
       day = fromIntegral . offset $ date - fixedFrom (Date year month 1) + 1
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, month, day} =
     RD $
       offset (epoch (Proxy :: Proxy Date))
@@ -236,7 +236,7 @@ lastDayOfMonth gYear gMonth =
   fromIntegral . dateDifference (Date gYear gMonth 1) $
     Date
       (if gMonth == December then gYear + 1 else gYear)
-      (toEnum $ fromEnum gMonth + 1 `mod1` 12)
+      (toEnum $ fromEnum gMonth + 1 `amod` 12)
       1
 
 independenceDay :: Year -> FixedDate

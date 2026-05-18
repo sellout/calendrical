@@ -48,8 +48,7 @@ module Data.Calendar.Types
     mins,
     mn,
     mod,
-    mod1,
-    modI,
+    mod3,
     modularToEnum,
     next,
     poly,
@@ -83,7 +82,6 @@ import "base" Data.Monoid (Sum (Sum), getSum)
 import "base" Data.Ord ((<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio (Ratio, Rational)
-import "base" Data.Tuple (fst)
 import "base" Numeric (asin, atan, cos, pi, sin, tan)
 import "base" Numeric.Natural (Natural)
 import "fin" Data.Fin (Fin)
@@ -91,7 +89,7 @@ import "fin" Data.Type.Nat (Nat)
 import "fin" Data.Type.Nat qualified as Nat
 import "mixed-radix" Numeric.MixedRadix (MixedRadix)
 import "mixed-radix" Numeric.MixedRadix qualified as Mixed
-import "numeric-tangle" Numeric.Chop (ceiling, floor, mixedFraction)
+import "numeric-tangle" Numeric.Chop (ceiling, floor)
 import "numeric-tangle" Numeric.Ration (rationalize, (%))
 import "numeric-tangle" Numeric.Widen (widen)
 import "base" Prelude
@@ -222,20 +220,28 @@ bogus = error "bogus"
 
 -- | Whole part of @m@/@n@.
 quotient :: Real -> NonzeroReal -> Integer
-quotient m = fst . mixedFraction . (m %)
+quotient m = floor . (m %)
 
 -- | The value of (@x@ mod @y@) with @y@ instead of 0.
-amod :: Integer -> NonzeroInteger -> Integer
+--
+--  __NOTE__: The type has been changed from the Common Lisp implementation.
+--            It’s generalized to anything that implements `Mod` and doesn’t
+--            specify “Nonnegative” for the second argument (but that was never
+--            enforced at the type level anyway).
+amod :: (Mod a) => a -> a -> a
 amod x y = y + x `mod` (-y)
 
 -- instance Mod Natural where
 --   mod = Prelude.mod
 
-modI :: (Eq a, Mod a) => a -> (a, a) -> a
-modI x (a, b) = if a == b then x else a + (x - a `mod` b - a)
-
-mod1 :: (Eq a, Mod a) => a -> a -> a
-mod1 x b = let r = x `mod` b in if r == 0 then b else r
+-- | The value of @x@ shifted into the range [@a@..@b@). Returns @x@ if @a=b@.
+--
+--  __NOTE__: This is generalized from the Common Lisp version, because it
+--            accepts anything that implements `Mod`. It also takes a tuple as
+--            its second argument rather than taking three arguments, so it can
+--            be used as an operator.
+mod3 :: (Eq a, Mod a) => a -> (a, a) -> a
+mod3 x (a, b) = if a == b then x else a + (x - a) `mod` (b - a)
 
 -- | [0..360)
 type Angle :: Type

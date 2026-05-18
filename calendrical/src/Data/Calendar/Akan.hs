@@ -8,7 +8,6 @@ module Data.Calendar.Akan
   ( Name (Name),
     Prefix (Fo, Kuru, Kwa, Mono, Nkyi, Nwona),
     Stem (Bene, Dwo, Fie, Kwasi, Memene, Wukuo, Yaw),
-    dayNameOnOrBefore,
     nameDifference,
     prefix,
     stem,
@@ -27,16 +26,18 @@ import "base" Data.Proxy (Proxy (Proxy))
 import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "this" Data.Calendar
-  ( CyclicCalendar,
+  ( Calendar,
+    CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
+    amod,
     epoch,
     fixedsFrom,
     fromFixed,
     fromMoment,
-    mod1,
-    modI,
+    mod3,
     offset,
+    onOrBefore,
   )
 import "this" Data.Calendar.Types (ModularEnum, modularToEnum)
 import "base" Prelude
@@ -117,22 +118,22 @@ data Name = Name {prefix :: Prefix, stem :: Stem}
 
 dayName :: Integer -> Name
 dayName n =
-  Name (toEnum . fromIntegral $ n `mod1` 6) . toEnum . fromIntegral $
-    n `mod1` 7
+  Name (toEnum . fromIntegral $ n `amod` 6) . toEnum . fromIntegral $
+    n `amod` 7
 
 nameDifference :: Name -> Name -> Integer
 nameDifference day1 day2 =
-  prefixDifference + 36 * (stemDifference - prefixDifference) `mod1` 42
+  prefixDifference + 36 * (stemDifference - prefixDifference) `amod` 42
   where
     prefixDifference = fromIntegral $ fromEnum (prefix day2) - fromEnum (prefix day1)
     stemDifference = fromIntegral $ fromEnum (stem day2) - fromEnum (stem day1)
 
-instance CyclicCalendar Name where
+instance Calendar Name where
   epoch _ = RD 37
   fromFixed (RD date) = dayName (date - offset (epoch (Proxy :: Proxy Name)))
   fromMoment (Moment t) = fromFixed . RD $ floor t
   fixedsFrom name =
-    let origin = dayNameOnOrBefore name . epoch $ Identity name
+    let origin = onOrBefore name . epoch $ Identity name
      in origin
           :| ( ( \cycle ->
                    let days = 42 * cycle in [origin - days, origin + days]
@@ -140,6 +141,7 @@ instance CyclicCalendar Name where
                  =<< [1 ..]
              )
 
-dayNameOnOrBefore :: Name -> FixedDate -> FixedDate
-dayNameOnOrBefore name (RD date) =
-  RD $ nameDifference (fromFixed $ RD 0) name `modI` (date, date - 42)
+instance CyclicCalendar Name where
+  -- Fixed date of latest date on or before fixed @date@ that has Akan @name@.
+  onOrBefore name (RD date) =
+    RD $ nameDifference (fromFixed $ RD 0) name `mod3` (date, date - 42)

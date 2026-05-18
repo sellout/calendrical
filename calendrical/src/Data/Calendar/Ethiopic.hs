@@ -19,7 +19,7 @@ import "base" Text.Read (Read)
 import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
+    LinearCalendar,
     epoch,
     fixedFrom,
     fromFixed,
@@ -63,10 +63,10 @@ ops =
   T30P5.operationsForEpoch . fixedFrom $
     Julian.Date (Julian.CE 8) Julian.August 29
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = T30P5.epoch ops
   fromFixed = T30P5.fromFixed ops
   fromMoment = T30P5.fromMoment ops
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom = T30P5.fixedFrom ops

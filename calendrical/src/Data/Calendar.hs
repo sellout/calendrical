@@ -11,7 +11,8 @@
 -- Copyright: 2024 Greg Pfeil
 -- License: AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial
 module Data.Calendar
-  ( Calendar,
+  ( LinearCalendar,
+    Calendar,
     CyclicCalendar,
     DayOfWeek (Friday, Monday, Saturday, Sunday, Thursday, Tuesday, Wednesday),
     Interval,
@@ -37,11 +38,11 @@ module Data.Calendar
     kdayBefore,
     kdayNearest,
     kdayOnOrAfter,
-    kdayOnOrBefore,
     listRange,
     momentFrom,
     momentToReal,
     offset,
+    onOrBefore,
     positionsInRange,
     timeFromClock,
     timeFromMoment,
@@ -49,8 +50,8 @@ module Data.Calendar
 
     -- * mod
     Mod (..),
-    modI,
-    mod1,
+    mod3,
+    amod,
   )
 where
 
@@ -89,11 +90,11 @@ import "this" Data.Calendar.Types
     NonegativeReal,
     PositiveReal,
     Real,
+    amod,
     binarySearch,
     deg,
     mod,
-    mod1,
-    modI,
+    mod3,
     modularToEnum,
   )
 import "base" Prelude
@@ -146,13 +147,16 @@ type IsoDateTime =
        Nat.FromGHC 60 -- second
      ]
 
--- | A `CyclicCalendar` doesn’t assign _unique_ names to dates, but can map
+-- | A `Calendar` doesn’t assign _unique_ names to dates, but can map
 --   multiple dates to the same name. A simple example is `DayOfWeek`, which
 --   maps all dates to one of @`Sunday` .. `Saturday`@.
 --
+--  __NOTE__: Every `Calendar` should implement one of either `CyclicCalendar`
+--            or `LinearCalendar`.
+--
 -- -prop> let date = fromFixed rd' in rd' `elem` fixedsFrom date
-type CyclicCalendar :: Type -> Constraint
-class CyclicCalendar date where
+type Calendar :: Type -> Constraint
+class Calendar date where
   type RD date :: Type
   type RD _ = FixedDate
 
@@ -174,16 +178,24 @@ class CyclicCalendar date where
   fromFixed = fromMoment . momentFrom
 
   -- | This returns either exactly one or an infinite number of `FixedDate`s. The
-  --   distinction is whether @date@ also implements `Calendar`, in which case
+  --   distinction is whether @date@ also implements `LinearCalendar`, in which case
   --   this must return a single value.
   --
   --   This returns values ordered by distance from @`RD` 0@. (Or is it distance
   --   from @`epoch` (`Proxy` :: `Proxy` date)@?)
   fixedsFrom :: date -> NonEmpty FixedDate
-  default fixedsFrom :: (Calendar date) => date -> NonEmpty FixedDate
+  default fixedsFrom :: (LinearCalendar date) => date -> NonEmpty FixedDate
   fixedsFrom = pure . fixedFrom
 
   fromMoment :: Moment -> date
+
+-- | A `Calendar` whose date space wraps around in a cycle, so a given @date@
+--   maps to infinitely many `FixedDate`s.
+type CyclicCalendar :: Type -> Constraint
+class (Calendar date) => CyclicCalendar date where
+  -- | The latest `FixedDate` on or before the given one whose `fromFixed`
+  --   projection equals @date@.
+  onOrBefore :: date -> FixedDate -> FixedDate
 
 -- |
 --
@@ -194,8 +206,8 @@ class CyclicCalendar date where
 --            calendars, and some calendars are “cyclic”, where an RD becomes a
 --            single “date”, but a “date” is a possibly infinite list of RDs (or
 --            moments).
-type Calendar :: Type -> Constraint
-class (CyclicCalendar date, Ord date) => Calendar date where
+type LinearCalendar :: Type -> Constraint
+class (Calendar date, Ord date) => LinearCalendar date where
   -- | I thisk these two form an isomorphism
   fixedFrom :: date -> FixedDate
   fixedFrom = fixedFromMoment . momentFrom
@@ -205,15 +217,15 @@ class (CyclicCalendar date, Ord date) => Calendar date where
   momentFrom :: date -> Moment
   momentFrom = momentFrom . fixedFrom
 
-validDate :: (Calendar date) => date -> Bool
+validDate :: (LinearCalendar date) => date -> Bool
 validDate date = date == fromFixed (fixedFrom date)
 
-instance CyclicCalendar FixedDate where
+instance Calendar FixedDate where
   epoch _ = RD 0
   fromFixed date = RD . dayNumberFromFixed date . epoch $ Identity date
   fromMoment = fixedFromMoment
 
-instance Calendar FixedDate where
+instance LinearCalendar FixedDate where
   fixedFrom date = fixedFromInteger (offset date) . epoch $ Identity date
   momentFrom = Moment . rationalize . offset
 
@@ -221,7 +233,7 @@ type JulianDayNumber :: Type
 newtype JulianDayNumber = JD {dayNumber :: Real}
   deriving stock (Eq, Ord, Read, Show)
 
-instance CyclicCalendar JulianDayNumber where
+instance Calendar JulianDayNumber where
   type RD JulianDayNumber = Moment
 
   -- (1.3)
@@ -230,11 +242,11 @@ instance CyclicCalendar JulianDayNumber where
   -- (1.5)
   fromMoment t = JD . momentToReal $ t - epoch (Proxy :: Proxy JulianDayNumber)
 
-instance Calendar JulianDayNumber where
+instance LinearCalendar JulianDayNumber where
   -- (1.4)
   momentFrom jd = Moment (dayNumber jd) + epoch (Identity jd)
 
-jd :: (Calendar date) => Integer -> date
+jd :: (LinearCalendar date) => Integer -> date
 jd n = fromFixed . RD $ n - 1721425
 
 -- | (1.12)
@@ -302,7 +314,7 @@ positionsInRange p c δ (a, b) =
     else date : positionsInRange p c δ (interval next b)
   where
     next = a + Moment (widen c)
-    date = Moment (widen $ p - δ) `modI` interval a next
+    date = Moment (widen $ p - δ) `mod3` interval a next
 
 type Range :: Type
 type Range = (FixedDate, FixedDate)
@@ -330,31 +342,31 @@ timeFromClock = (widen (1 % (24 :: Natural)) *) . MixedRadix.eval
 clockFromMoment :: Moment -> Either MixedRadix.FloatFailure ClockTime
 clockFromMoment (Moment t) = MixedRadix.interpret . snd $ mixedFraction t
 
--- instance CyclicCalendar Hebrew where
+-- instance Calendar Hebrew where
 --   epoch _ = RD -1373427
 
--- instance CyclicCalendar Mayan where
+-- instance Calendar Mayan where
 --   epoch _ = RD -1137142
 
--- instance CyclicCalendar Chinese where
+-- instance Calendar Chinese where
 --   epoch _ = RD -963099
 
--- instance CyclicCalendar Samaritan where
+-- instance Calendar Samaritan where
 --   epoch _ = RD -598573
 
--- instance CyclicCalendar Babylonian where
+-- instance Calendar Babylonian where
 --   epoch _ = RD -113502
 
--- instance CyclicCalendar Tibetan where
+-- instance Calendar Tibetan where
 --   epoch _ = RD -46410
 
--- instance CyclicCalendar ISO where
+-- instance Calendar ISO where
 --   epoch _ = RD 1
 
--- instance CyclicCalendar Persian where
+-- instance Calendar Persian where
 --   epoch _ = RD 226896
 
--- instance CyclicCalendar Islamic where
+-- instance Calendar Islamic where
 --   epoch _ = RD 227015
 
 type DayOfWeek :: Type
@@ -395,7 +407,7 @@ instance Enum DayOfWeek where
 
 instance ModularEnum DayOfWeek
 
-instance CyclicCalendar DayOfWeek where
+instance Calendar DayOfWeek where
   epoch _ = RD 0
 
   -- (1.60)
@@ -425,46 +437,47 @@ type StandardDay = Fin (Nat.FromGHC 32)
 type StandardYear :: Type
 type StandardYear = Integer
 
-kdayOnOrBefore :: DayOfWeek -> FixedDate -> FixedDate
-kdayOnOrBefore k (RD date) =
-  RD $
-    date
-      - widen
-        (fromEnum @DayOfWeek . fromFixed . RD $ date - widen (fromEnum k))
+instance CyclicCalendar DayOfWeek where
+  -- Fixed date of the @k@-day on or before fixed @date@.
+  onOrBefore k (RD date) =
+    RD $
+      date
+        - widen
+          (fromEnum @DayOfWeek . fromFixed . RD $ date - widen (fromEnum k))
 
 kdayOnOrAfter :: DayOfWeek -> FixedDate -> FixedDate
-kdayOnOrAfter k = kdayOnOrBefore k . (+ 6)
+kdayOnOrAfter k = onOrBefore k . (+ 6)
 
 kdayNearest :: DayOfWeek -> FixedDate -> FixedDate
-kdayNearest k = kdayOnOrBefore k . (+ 3)
+kdayNearest k = onOrBefore k . (+ 3)
 
 -- | Fixed date of the @k@-day before fixed @date@. @k@=0 means Sunday, @k@=1
 --   means Monday, and so on.
 kdayBefore :: DayOfWeek -> FixedDate -> FixedDate
-kdayBefore k date = kdayOnOrBefore k $ date - 1
+kdayBefore k date = onOrBefore k $ date - 1
 
 -- | Fixed date of the @k@-day after fixed @date@. @k@=0 means Sunday, @k@=1
 --   means Monday, and so on.
 kdayAfter :: DayOfWeek -> FixedDate -> FixedDate
-kdayAfter k = kdayOnOrBefore k . (+ 7)
+kdayAfter k = onOrBefore k . (+ 7)
 
--- instance CyclicCalendar FrenchRevolutionary where
+-- instance Calendar FrenchRevolutionary where
 --   epoch _ = RD 654415
 
--- instance CyclicCalendar Baha'i where
+-- instance Calendar Baha'i where
 --   epoch _ = RD 673222
 
 type ModifiedJulianDayNumber :: Type
 newtype ModifiedJulianDayNumber = MJD Integer
   deriving stock (Eq, Ord, Read, Show)
 
-instance CyclicCalendar ModifiedJulianDayNumber where
+instance Calendar ModifiedJulianDayNumber where
   epoch _ = RD 678576
   fromFixed (RD date) =
     MJD $ date - offset (epoch (Proxy :: Proxy ModifiedJulianDayNumber))
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar ModifiedJulianDayNumber where
+instance LinearCalendar ModifiedJulianDayNumber where
   fixedFrom (MJD mjd) =
     RD $ mjd + offset (epoch (Proxy :: Proxy ModifiedJulianDayNumber))
 
@@ -472,12 +485,12 @@ type Unix :: Type
 newtype Unix = SecondsSinceUnixEpoch Second
   deriving stock (Eq, Ord, Read, Show)
 
-instance CyclicCalendar Unix where
+instance Calendar Unix where
   epoch _ = RD 719163
   fromMoment (Moment t) =
     SecondsSinceUnixEpoch $
       24 * 60 * 60 * (t - fromIntegral (offset $ epoch (Proxy :: Proxy Unix)))
 
-instance Calendar Unix where
+instance LinearCalendar Unix where
   momentFrom (SecondsSinceUnixEpoch s) =
     momentFrom (epoch (Proxy :: Proxy Unix)) + Moment (s % 24 % 60 % 60)

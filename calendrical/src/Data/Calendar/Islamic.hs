@@ -33,8 +33,8 @@ import "fin" Data.Type.Nat qualified as Nat
 import "numeric-tangle" Numeric.Widen (widen)
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     epoch,
     fixedFrom,
@@ -120,7 +120,7 @@ type Date :: Type
 data Date = Date {year :: Year, month :: Month, day :: Day}
   deriving stock (Eq, Ord, Show)
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = fixedFrom $ Julian.Date (Julian.CE 622) Julian.July 16
   fromFixed date =
     let year = (30 * offset (date - epoch (Proxy :: Proxy Date)) + 10646) `div` 10631
@@ -134,7 +134,7 @@ instance CyclicCalendar Date where
           }
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, month, day} =
     RD $
       offset (epoch (Proxy :: Proxy Date))

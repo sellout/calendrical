@@ -14,10 +14,12 @@ import "base" Data.Eq (Eq)
 import "base" Data.Function (($))
 import "base" Data.Kind (Type)
 import "base" Data.Ord (Ord)
+import "base" Text.Read (Read)
+import "base" Text.Show (Show)
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     FixedDate (RD),
+    LinearCalendar,
     epoch,
     fixedFrom,
     fromFixed,
@@ -42,7 +44,7 @@ data Month
   | Bahman
   | Asfand
   | GathaDays
-  deriving stock (Bounded, Enum, Eq, Ord)
+  deriving stock (Bounded, Enum, Eq, Ord, Read, Show)
 
 type Date :: Type
 type Date = T30P5.Date Month
@@ -50,10 +52,10 @@ type Date = T30P5.Date Month
 ops :: T30P5.Operations Month
 ops = T30P5.operationsForEpoch $ RD 230638
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = T30P5.epoch ops
   fromFixed = T30P5.fromFixed ops
   fromMoment = T30P5.fromMoment ops
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom = T30P5.fixedFrom ops

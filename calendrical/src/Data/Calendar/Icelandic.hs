@@ -40,9 +40,9 @@ import "numeric-tangle" Numeric.Widen (widen)
 import "numeric-tangle-fin" Numeric.Widen.Instances.Fin ()
 import "this" Data.Calendar
   ( Calendar,
-    CyclicCalendar,
     DayOfWeek (Saturday, Thursday),
     FixedDate (RD),
+    LinearCalendar,
     Moment (Moment),
     epoch,
     fixedFrom,
@@ -107,7 +107,7 @@ summer iYear =
 winter :: Year -> FixedDate
 winter iYear = summer (iYear + 1) - 180
 
-instance CyclicCalendar Date where
+instance Calendar Date where
   epoch _ = fixedFrom $ Gregorian.Date 1 Gregorian.April 19
   fromFixed date =
     let approx =
@@ -125,7 +125,7 @@ instance CyclicCalendar Date where
           }
   fromMoment (Moment t) = fromFixed . RD $ floor t
 
-instance Calendar Date where
+instance LinearCalendar Date where
   fixedFrom Date {year, season, week, weekday} =
     start
       + RD (7 * (widen week - 1))
