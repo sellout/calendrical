@@ -31,13 +31,14 @@ import "this" Data.Calendar
     FixedDate (RD),
     Moment (Moment),
     amod,
+    cycleLength,
     epoch,
     fixedsFrom,
     fromFixed,
     fromMoment,
-    mod3,
     offset,
     onOrBefore,
+    ordinal,
   )
 import "this" Data.Calendar.Types (ModularEnum, modularToEnum)
 import "base" Prelude
@@ -125,7 +126,8 @@ nameDifference :: Name -> Name -> Integer
 nameDifference day1 day2 =
   prefixDifference + 36 * (stemDifference - prefixDifference) `amod` 42
   where
-    prefixDifference = fromIntegral $ fromEnum (prefix day2) - fromEnum (prefix day1)
+    prefixDifference =
+      fromIntegral $ fromEnum (prefix day2) - fromEnum (prefix day1)
     stemDifference = fromIntegral $ fromEnum (stem day2) - fromEnum (stem day1)
 
 instance Calendar Name where
@@ -133,7 +135,7 @@ instance Calendar Name where
   fromFixed (RD date) = dayName (date - offset (epoch (Proxy :: Proxy Name)))
   fromMoment (Moment t) = fromFixed . RD $ floor t
   fixedsFrom name =
-    let origin = onOrBefore name . epoch $ Identity name
+    let origin = name `onOrBefore` epoch (Identity name)
      in origin
           :| ( ( \cycle ->
                    let days = 42 * cycle in [origin - days, origin + days]
@@ -142,6 +144,6 @@ instance Calendar Name where
              )
 
 instance CyclicCalendar Name where
-  -- Fixed date of latest date on or before fixed @date@ that has Akan @name@.
-  onOrBefore name (RD date) =
-    RD $ nameDifference (fromFixed $ RD 0) name `mod3` (date, date - 42)
+  cycleLength _ = 42
+  ordinal =
+    fromIntegral . nameDifference (fromFixed $ epoch (Proxy :: Proxy Name))

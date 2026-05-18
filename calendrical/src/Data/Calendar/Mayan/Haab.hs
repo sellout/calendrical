@@ -44,19 +44,18 @@ import "this" Data.Calendar
     CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
+    cycleLength,
     epoch,
     fixedsFrom,
     fromFixed,
     fromMoment,
     offset,
-    onOrBefore,
+    ordinal,
   )
 import "this" Data.Calendar.Mayan qualified as Mayan
 import "this" Data.Calendar.Types
   ( ModularEnum,
-    NonnegativeInteger,
     mod,
-    mod3,
     modularToEnum,
     toModularEnum,
   )
@@ -170,12 +169,6 @@ type Date :: Type
 data Date = Date {month :: Month, day :: Day}
   deriving stock (Eq, Ord, Show)
 
--- | Number of days into cycle of Mayan haab date @hDate@.
---
---  (11.4)
-ordinal :: Date -> NonnegativeInteger
-ordinal Date {month, day} = (fromIntegral (fromEnum month) - 1) * 20 + widen day
-
 -- | Convert an `Integral` value to a `Fin`, using the bound as modulus.
 --
 -- >>> finMod @(Nat.FromGHC 15) 403
@@ -217,7 +210,10 @@ instance Calendar Date where
 --
 --  (11.7)
 instance CyclicCalendar Date where
-  onOrBefore haab (RD date) =
-    RD $
-      widen (ordinal haab)
-        + offset (epoch (Proxy :: Proxy Date)) `mod3` (date, date - 365)
+  cycleLength _ = 365
+
+  -- Number of days into cycle of Mayan haab date @hDate@.
+  --
+  -- (11.4)
+  ordinal Date {month, day} =
+    (fromIntegral (fromEnum month) - 1) * 20 + widen day

@@ -48,9 +48,9 @@ import "this" Data.Calendar
     fixedFrom,
     fromFixed,
     fromMoment,
-    kdayOnOrAfter,
     mod,
     offset,
+    onOrAfter,
   )
 import "this" Data.Calendar.Gregorian qualified as Gregorian
 import "this" Data.Calendar.Types (Angle, Integer)
@@ -101,8 +101,9 @@ data Date = Date
 
 summer :: Year -> FixedDate
 summer iYear =
-  kdayOnOrAfter Thursday $
-    fixedFrom (Gregorian.Date (fromInteger iYear) Gregorian.April 19)
+  Thursday
+    `onOrAfter` fixedFrom
+      (Gregorian.Date (fromInteger iYear) Gregorian.April 19)
 
 winter :: Year -> FixedDate
 winter iYear = summer (iYear + 1) - 180

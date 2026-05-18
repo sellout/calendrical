@@ -1,6 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE Trustworthy #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-name-shadowing -Wno-unused-top-binds #-}
 -- __FIXME__: I think this is due to a GHC bug.
@@ -26,23 +25,28 @@ module Data.Calendar
     StandardMonth,
     StandardYear,
     Unix (SecondsSinceUnixEpoch),
+    after,
+    before,
     clockFromMoment,
+    cycleLength,
     epoch,
+    firstDay,
     fixedFrom,
     fixedsFrom,
     fromFixed,
     fromMoment,
     intervalClosed,
     invertAngular,
-    kdayAfter,
-    kdayBefore,
-    kdayNearest,
-    kdayOnOrAfter,
+    lastDay,
     listRange,
     momentFrom,
     momentToReal,
+    nearest,
+    nthDay,
     offset,
+    onOrAfter,
     onOrBefore,
+    ordinal,
     positionsInRange,
     timeFromClock,
     timeFromMoment,
@@ -69,7 +73,7 @@ import "base" Data.Functor.Identity (Identity (Identity))
 import "base" Data.Kind (Constraint, Type)
 import "base" Data.List.NonEmpty (NonEmpty ((:|)))
 import "base" Data.Maybe (Maybe (Just))
-import "base" Data.Ord (Ord, (<), (<=))
+import "base" Data.Ord (Ord, Ordering (EQ, GT, LT), compare, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Tuple (fst, snd, uncurry)
 import "base" Numeric.Natural (Natural)
@@ -88,10 +92,13 @@ import "this" Data.Calendar.Types
     Mod,
     ModularEnum,
     NonegativeReal,
+    NonnegativeInteger,
+    NonzeroInteger,
     PositiveReal,
     Real,
     amod,
     binarySearch,
+    bogus,
     deg,
     mod,
     mod3,
@@ -106,6 +113,8 @@ import "base" Prelude
     --           a “weaker” `Enum` that gives us `prev`/`succ` without the
     --           mapping to `Int`.
     fromIntegral,
+    pred,
+    quot,
     toEnum,
     (*),
     (+),
@@ -192,10 +201,62 @@ class Calendar date where
 -- | A `Calendar` whose date space wraps around in a cycle, so a given @date@
 --   maps to infinitely many `FixedDate`s.
 type CyclicCalendar :: Type -> Constraint
-class (Calendar date) => CyclicCalendar date where
+class (Calendar date, LinearCalendar (RD date)) => CyclicCalendar date where
+  -- | Number of days in a cycle.
+  cycleLength :: proxy date -> NonnegativeInteger
+
+  -- | Number of days into the cycle.
+  --
+  --  __TODO__: Could probably have this return @`Fin` cycleLength@.
+  ordinal :: date -> NonnegativeInteger
+
   -- | The latest `FixedDate` on or before the given one whose `fromFixed`
   --   projection equals @date@.
   onOrBefore :: date -> FixedDate -> FixedDate
+  onOrBefore date (RD rd) =
+    RD $
+      (widen (ordinal date) + offset (fixedFrom $ epoch p))
+        `mod3` (rd, rd - widen (cycleLength p))
+    where
+      p :: Proxy date
+      p = Proxy
+
+onOrAfter ::
+  forall date. (CyclicCalendar date) => date -> FixedDate -> FixedDate
+onOrAfter d =
+  (d `onOrBefore`) . (+ RD (widen . pred $ cycleLength (Proxy :: Proxy date)))
+
+nearest :: forall date. (CyclicCalendar date) => date -> FixedDate -> FixedDate
+nearest d =
+  (d `onOrBefore`) . (+ RD (widen $ cycleLength (Proxy :: Proxy date) `quot` 2))
+
+-- | Fixed date of the @k@-day before fixed @date@. @k@=0 means Sunday, @k@=1
+--   means Monday, and so on.
+before :: (CyclicCalendar date) => date -> FixedDate -> FixedDate
+before d date = d `onOrBefore` (date - 1)
+
+-- | Fixed date of the @k@-day after fixed @date@. @k@=0 means Sunday, @k@=1
+--   means Monday, and so on.
+after :: forall date. (CyclicCalendar date) => date -> FixedDate -> FixedDate
+after d = (d `onOrBefore`) . (+ RD (widen $ cycleLength (Proxy :: Proxy date)))
+
+-- | If @n@>0, return the @n@-th @k@-day on or after @gDate@. If @n@<0, return
+--   the @n@-th @k@-day on or before @gDate@. If @n@=0 return bogus.
+--
+--  __NOTE__: This is generalized from @nth-kday@.
+nthDay ::
+  (CyclicCalendar date) => NonzeroInteger -> date -> FixedDate -> FixedDate
+nthDay n d =
+  RD
+    . (widen (cycleLength $ Identity d) * n +)
+    . offset
+    . (case compare n 0 of GT -> before; LT -> after; EQ -> bogus) d
+
+firstDay :: (CyclicCalendar date) => date -> FixedDate -> FixedDate
+firstDay = nthDay 1
+
+lastDay :: (CyclicCalendar date) => date -> FixedDate -> FixedDate
+lastDay = nthDay (-1)
 
 -- |
 --
@@ -438,28 +499,8 @@ type StandardYear :: Type
 type StandardYear = Integer
 
 instance CyclicCalendar DayOfWeek where
-  -- Fixed date of the @k@-day on or before fixed @date@.
-  onOrBefore k (RD date) =
-    RD $
-      date
-        - widen
-          (fromEnum @DayOfWeek . fromFixed . RD $ date - widen (fromEnum k))
-
-kdayOnOrAfter :: DayOfWeek -> FixedDate -> FixedDate
-kdayOnOrAfter k = onOrBefore k . (+ 6)
-
-kdayNearest :: DayOfWeek -> FixedDate -> FixedDate
-kdayNearest k = onOrBefore k . (+ 3)
-
--- | Fixed date of the @k@-day before fixed @date@. @k@=0 means Sunday, @k@=1
---   means Monday, and so on.
-kdayBefore :: DayOfWeek -> FixedDate -> FixedDate
-kdayBefore k date = onOrBefore k $ date - 1
-
--- | Fixed date of the @k@-day after fixed @date@. @k@=0 means Sunday, @k@=1
---   means Monday, and so on.
-kdayAfter :: DayOfWeek -> FixedDate -> FixedDate
-kdayAfter k = onOrBefore k . (+ 7)
+  cycleLength _ = 7
+  ordinal = fromIntegral . fromEnum
 
 -- instance Calendar FrenchRevolutionary where
 --   epoch _ = RD 654415
