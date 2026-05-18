@@ -41,12 +41,14 @@ import "this" Data.Calendar
     CyclicCalendar,
     FixedDate (RD),
     Moment (Moment),
+    cycleLength,
     epoch,
     fixedsFrom,
     fromFixed,
     fromMoment,
     offset,
     onOrBefore,
+    ordinal,
   )
 import "this" Data.Calendar.Mayan qualified as Mayan
 import "this" Data.Calendar.Mayan.Haab qualified as Haab
@@ -159,15 +161,6 @@ type Date :: Type
 data Date = Date {number :: Number, name :: Name}
   deriving stock (Eq, Ord, Show)
 
--- | Number of days into Mayan tzolkin cycle of @tDate@.
---
---  (11.10)
-ordinal :: Date -> NonnegativeInteger
-ordinal Date {number, name} =
-  let signedNumber = widen @NonnegativeInteger @Integer $ widen number
-   in widen . Haab.finMod @(Nat.FromGHC 260) $
-        signedNumber - 1 + 39 * (signedNumber - widen (fromEnum name))
-
 instance Calendar Date where
   -- (11.8)
   epoch _ = Mayan.epoch - RD (widen . ordinal $ Date 4 Ahau)
@@ -197,10 +190,15 @@ instance Calendar Date where
 --
 --  (11.11)
 instance CyclicCalendar Date where
-  onOrBefore tzolkin (RD date) =
-    RD $
-      (widen (ordinal tzolkin) + offset (epoch (Proxy :: Proxy Date)))
-        `mod3` (date, date - 260)
+  cycleLength _ = 260
+
+  -- Number of days into Mayan tzolkin cycle of @tDate@.
+  --
+  -- (11.10)
+  ordinal Date {number, name} =
+    let signedNumber = widen @NonnegativeInteger @Integer $ widen number
+     in widen . Haab.finMod @(Nat.FromGHC 260) $
+          signedNumber - 1 + 39 * (signedNumber - widen (fromEnum name))
 
 -- | Year bearer of year containing fixed @date@. Returns `Nothing` for uayeb.
 --

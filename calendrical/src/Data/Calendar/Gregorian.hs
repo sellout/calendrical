@@ -50,7 +50,7 @@ import "base" Data.Bool (Bool (True), not, (&&), (||))
 import "base" Data.Eq (Eq, (==))
 import "base" Data.Function (($))
 import "base" Data.Kind (Type)
-import "base" Data.Ord (Ord, Ordering (EQ, GT, LT), compare, (<), (<=))
+import "base" Data.Ord (Ord, (<), (<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio ((%))
 import "base" Data.Tuple (fst, snd, uncurry)
@@ -69,22 +69,23 @@ import "this" Data.Calendar
     Range,
     amod,
     epoch,
+    firstDay,
     fixedFrom,
     fromFixed,
     fromMoment,
-    kdayAfter,
-    kdayBefore,
-    kdayNearest,
-    kdayOnOrAfter,
+    lastDay,
     mod,
+    nearest,
+    nthDay,
     offset,
+    onOrAfter,
   )
 import "this" Data.Calendar.Types
   ( Integer,
     ModularEnum,
     NonnegativeInteger,
+    NonzeroInteger,
     PositiveInteger,
-    bogus,
     modularToEnum,
   )
 import "base" Prelude
@@ -243,21 +244,20 @@ independenceDay :: Year -> FixedDate
 independenceDay gYear = fixedFrom $ Date gYear July 4
 
 -- | If @n@>0, return the @n@-th @k@-day on or after @gDate@. If @n@<0, return
---   the @n@-th @k@-day on or before @gDate@. If @n@=0 return bogus. A @k@-day
---   of 0 means Sunday, 1 means Monday, and so on.
-nthKday :: Integer -> DayOfWeek -> Date -> FixedDate
-nthKday n k gDate = RD $ case compare n 0 of
-  GT -> 7 * n + offset (kdayBefore k fixedDate)
-  LT -> 7 * n + offset (kdayAfter k fixedDate)
-  EQ -> bogus
-  where
-    fixedDate = fixedFrom gDate
+--   the @n@-th @k@-day on or before @gDate@. If @n@=0 return bogus.
+--
+--  __NOTE__: The book has the first argument as `Integer`, but this fails on 0,
+--            so …
+nthKday :: NonzeroInteger -> DayOfWeek -> Date -> FixedDate
+nthKday n k = nthDay n k . fixedFrom
 
+-- | Fixed date of first @k@-day on or after Gregorian date @gDate@.
 firstKday :: DayOfWeek -> Date -> FixedDate
-firstKday = nthKday 1
+firstKday k = firstDay k . fixedFrom
 
+-- | Fixed date of last @k@-day on or before Gregorian date @gDate@.
 lastKday :: DayOfWeek -> Date -> FixedDate
-lastKday = nthKday (-1)
+lastKday k = lastDay k . fixedFrom
 
 laborDay :: Year -> FixedDate
 laborDay gYear = firstKday Monday $ Date gYear September 1
@@ -284,7 +284,7 @@ christmas :: Year -> FixedDate
 christmas gYear = fixedFrom $ Date gYear December 25
 
 advent :: Year -> FixedDate
-advent gYear = kdayNearest Sunday . fixedFrom $ Date gYear November 30
+advent gYear = Sunday `nearest` fixedFrom (Date gYear November 30)
 
 epiphany :: Year -> FixedDate
 epiphany gYear = firstKday Sunday $ Date gYear January 2
@@ -300,7 +300,7 @@ unluckyFridaysInRange a b =
     else []
   where
     range = (a, b)
-    fri = kdayOnOrAfter Friday a
+    fri = Friday `onOrAfter` a
     date = fromFixed fri
 
 unluckyFridays :: Year -> [FixedDate]
