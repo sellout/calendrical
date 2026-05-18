@@ -82,7 +82,6 @@ import "base" Data.Monoid (Sum (Sum), getSum)
 import "base" Data.Ord ((<=))
 import "base" Data.Proxy (Proxy (Proxy))
 import "base" Data.Ratio (Ratio, Rational)
-import "base" Data.Tuple (fst)
 import "base" Numeric (asin, atan, cos, pi, sin, tan)
 import "base" Numeric.Natural (Natural)
 import "fin" Data.Fin (Fin)
@@ -90,7 +89,7 @@ import "fin" Data.Type.Nat (Nat)
 import "fin" Data.Type.Nat qualified as Nat
 import "mixed-radix" Numeric.MixedRadix (MixedRadix)
 import "mixed-radix" Numeric.MixedRadix qualified as Mixed
-import "numeric-tangle" Numeric.Chop (ceiling, floor, mixedFraction)
+import "numeric-tangle" Numeric.Chop (ceiling, floor)
 import "numeric-tangle" Numeric.Ration (rationalize, (%))
 import "numeric-tangle" Numeric.Widen (widen)
 import "base" Prelude
@@ -221,7 +220,7 @@ bogus = error "bogus"
 
 -- | Whole part of @m@/@n@.
 quotient :: Real -> NonzeroReal -> Integer
-quotient m = fst . mixedFraction . (m %)
+quotient m = floor . (m %)
 
 -- | The value of (@x@ mod @y@) with @y@ instead of 0.
 --
