@@ -56,7 +56,7 @@ import "this" Data.Calendar.Types
     NonnegativeInteger,
     amod,
     mod,
-    modI,
+    mod3,
     modularToEnum,
     toModularEnum,
   )
@@ -200,7 +200,7 @@ instance CyclicCalendar Date where
   onOrBefore tzolkin (RD date) =
     RD $
       (widen (ordinal tzolkin) + offset (epoch (Proxy :: Proxy Date)))
-        `modI` (date, date - 260)
+        `mod3` (date, date - 260)
 
 -- | Year bearer of year containing fixed @date@. Returns `Nothing` for uayeb.
 --
@@ -219,7 +219,7 @@ yearBearerFromFixed date =
 roundOnOrBefore :: Haab.Date -> Date -> FixedDate -> Maybe FixedDate
 roundOnOrBefore haab tzolkin (RD date) =
   if (diff `mod` 5) == 0
-    then pure . RD $ (haabCount + 365 * diff) `modI` (date, date - 18_980)
+    then pure . RD $ (haabCount + 365 * diff) `mod3` (date, date - 18_980)
     else empty -- haab-tzolkin combination is impossible.
   where
     haabCount =

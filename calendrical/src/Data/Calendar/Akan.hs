@@ -35,7 +35,7 @@ import "this" Data.Calendar
     fixedsFrom,
     fromFixed,
     fromMoment,
-    modI,
+    mod3,
     offset,
     onOrBefore,
   )
@@ -144,4 +144,4 @@ instance Calendar Name where
 instance CyclicCalendar Name where
   -- Fixed date of latest date on or before fixed @date@ that has Akan @name@.
   onOrBefore name (RD date) =
-    RD $ nameDifference (fromFixed $ RD 0) name `modI` (date, date - 42)
+    RD $ nameDifference (fromFixed $ RD 0) name `mod3` (date, date - 42)

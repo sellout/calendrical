@@ -50,7 +50,7 @@ module Data.Calendar
 
     -- * mod
     Mod (..),
-    modI,
+    mod3,
     amod,
   )
 where
@@ -94,7 +94,7 @@ import "this" Data.Calendar.Types
     binarySearch,
     deg,
     mod,
-    modI,
+    mod3,
     modularToEnum,
   )
 import "base" Prelude
@@ -314,7 +314,7 @@ positionsInRange p c δ (a, b) =
     else date : positionsInRange p c δ (interval next b)
   where
     next = a + Moment (widen c)
-    date = Moment (widen $ p - δ) `modI` interval a next
+    date = Moment (widen $ p - δ) `mod3` interval a next
 
 type Range :: Type
 type Range = (FixedDate, FixedDate)

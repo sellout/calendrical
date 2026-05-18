@@ -48,7 +48,7 @@ module Data.Calendar.Types
     mins,
     mn,
     mod,
-    modI,
+    mod3,
     modularToEnum,
     next,
     poly,
@@ -236,8 +236,13 @@ amod x y = y + x `mod` (-y)
 --   mod = Prelude.mod
 
 -- | The value of @x@ shifted into the range [@a@..@b@). Returns @x@ if @a=b@.
-modI :: (Eq a, Mod a) => a -> (a, a) -> a
-modI x (a, b) = if a == b then x else a + (x - a) `mod` (b - a)
+--
+--  __NOTE__: This is generalized from the Common Lisp version, because it
+--            accepts anything that implements `Mod`. It also takes a tuple as
+--            its second argument rather than taking three arguments, so it can
+--            be used as an operator.
+mod3 :: (Eq a, Mod a) => a -> (a, a) -> a
+mod3 x (a, b) = if a == b then x else a + (x - a) `mod` (b - a)
 
 -- | [0..360)
 type Angle :: Type

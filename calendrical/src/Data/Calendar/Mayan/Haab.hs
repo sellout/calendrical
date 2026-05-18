@@ -56,7 +56,7 @@ import "this" Data.Calendar.Types
   ( ModularEnum,
     NonnegativeInteger,
     mod,
-    modI,
+    mod3,
     modularToEnum,
     toModularEnum,
   )
@@ -220,4 +220,4 @@ instance CyclicCalendar Date where
   onOrBefore haab (RD date) =
     RD $
       widen (ordinal haab)
-        + offset (epoch (Proxy :: Proxy Date)) `modI` (date, date - 365)
+        + offset (epoch (Proxy :: Proxy Date)) `mod3` (date, date - 365)
