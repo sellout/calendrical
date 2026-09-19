@@ -10,9 +10,9 @@ Bold-faced **`package-name`**s denote standard libraries bundled with `ghc-9.10.
 | --- | --- | --- | --- | --- |
 | **`base`** | [`4.20.0.0`](http://hackage.haskell.org/package/base-4.20.0.0) | [`BSD-3-Clause`](http://hackage.haskell.org/package/base-4.20.0.0/src/LICENSE) | Core data structures and operations | *(core library)* |
 | `fin` | [`0.3.2`](http://hackage.haskell.org/package/fin-0.3.2) | [`BSD-3-Clause`](http://hackage.haskell.org/package/fin-0.3.2/src/LICENSE) | Nat and Fin: peano naturals and finite numbers | `mixed-radix`, `numeric-tangle-fin` |
-| `ghc-compat-plugin` | [`0.1.0.1`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1) | [`AGPL-3.0-only`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1/src/LICENSE.AGPL-3.0-only) | Eases support for multiple GHC versions | `mixed-radix`, `numeric-tangle`, `numeric-tangle-fin` |
+| `ghc-compat-plugin` | [`0.1.0.1`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1) | [`AGPL-3.0-only`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1/src/LICENSE.AGPL-3.0-only) | Eases support for multiple GHC versions | `mixed-radix`, `no-recursion`, `numeric-tangle`, `numeric-tangle-fin` |
 | `mixed-radix` | [`0.0.1.0`](http://hackage.haskell.org/package/mixed-radix-0.0.1.0) |  *MISSING* | *MISSING* |  |
-| `no-recursion` | [`0.4.0.0`](http://hackage.haskell.org/package/no-recursion-0.4.0.0) | [`(AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial)`](http://hackage.haskell.org/package/no-recursion-0.4.0.0/src/LICENSE) | A GHC plugin to remove support for recursion | `mixed-radix`, `numeric-tangle`, `numeric-tangle-fin` |
+| `no-recursion` | [`0.4.0.1`](http://hackage.haskell.org/package/no-recursion-0.4.0.1) | [`(AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-proprietary)`](http://hackage.haskell.org/package/no-recursion-0.4.0.1/src/LICENSE) | A GHC plugin to remove support for recursion | `mixed-radix`, `numeric-tangle`, `numeric-tangle-fin` |
 | `numeric-tangle` | [`0.0.1.0`](http://hackage.haskell.org/package/numeric-tangle-0.0.1.0) |  *MISSING* | *MISSING* | `numeric-tangle-fin` |
 | `numeric-tangle-fin` | [`0.0.1.0`](http://hackage.haskell.org/package/numeric-tangle-fin-0.0.1.0) |  *MISSING* | *MISSING* |  |
 

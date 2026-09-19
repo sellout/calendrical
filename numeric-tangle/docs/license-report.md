@@ -9,8 +9,8 @@ Bold-faced **`package-name`**s denote standard libraries bundled with `ghc-9.10.
 | Name | Version | [SPDX](https://spdx.org/licenses/) License Id | Description | Also depended upon by |
 | --- | --- | --- | --- | --- |
 | **`base`** | [`4.20.0.0`](http://hackage.haskell.org/package/base-4.20.0.0) | [`BSD-3-Clause`](http://hackage.haskell.org/package/base-4.20.0.0/src/LICENSE) | Core data structures and operations | *(core library)* |
-| `ghc-compat-plugin` | [`0.1.0.1`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1) | [`AGPL-3.0-only`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1/src/LICENSE.AGPL-3.0-only) | Eases support for multiple GHC versions |  |
-| `no-recursion` | [`0.4.0.0`](http://hackage.haskell.org/package/no-recursion-0.4.0.0) | [`(AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-commercial)`](http://hackage.haskell.org/package/no-recursion-0.4.0.0/src/LICENSE) | A GHC plugin to remove support for recursion |  |
+| `ghc-compat-plugin` | [`0.1.0.1`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1) | [`AGPL-3.0-only`](http://hackage.haskell.org/package/ghc-compat-plugin-0.1.0.1/src/LICENSE.AGPL-3.0-only) | Eases support for multiple GHC versions | `no-recursion` |
+| `no-recursion` | [`0.4.0.1`](http://hackage.haskell.org/package/no-recursion-0.4.0.1) | [`(AGPL-3.0-only WITH Universal-FOSS-exception-1.0 OR LicenseRef-proprietary)`](http://hackage.haskell.org/package/no-recursion-0.4.0.1/src/LICENSE) | A GHC plugin to remove support for recursion |  |
 
 ## Indirect transitive dependencies
 
